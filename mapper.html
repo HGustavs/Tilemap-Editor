@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #wrapper{
+            display:grid;
+            grid-template-areas: "main tools";
+        }
+
+        #myCanvas{
+            grid-area:main;
+        }
+
+        #toolsCanvas{
+            grid-area:tools;
+        }
+        
+    </style>
+    <script>//document.write("<script type='text/javascript' src='helperFunction/hexcolors.js?t=" + Date.now() + "'><\/script>");</script>
+		<script>
+var c;
+var mx,my,mb=0;
+
+var tilesize=16;
+var tilecntX=20;
+var tilecntY=20;
+var tiles = new Image();
+var world = new Image();
+var screentiles=15;
+
+var tilemap=[];
+
+// Draw a single tile from tilemap
+function drawTile(tileno,dx,dy,tileimg)
+{
+    var tileX=tileno%tilecntX;
+    var tileY=Math.floor(tileno/tilecntX);
+
+    c.drawImage(tileimg, tileX*tilesize, tileY*tilesize, tilesize, tilesize, dx, dy, tilesize, tilesize)
+}
+
+function drawtilemap()
+{
+    for(var i=0;i<screentiles;i++){
+        for(var j=0;j<screentiles;j++){
+            var tileno=tilemap[(i*screentiles)+j];
+            drawTile(tileno,j*tilesize,i*tilesize,tiles);
+        }
+    }
+}
+
+function zetup()
+{
+    var cc = document.getElementById("myCanvas");
+    c = cc.getContext("2d");
+
+    var cc = document.getElementById("toolCanvas");
+    toolcanvas = cc.getContext("2d");
+
+    tiles.src = 'tilesets/worldtiles.png';
+    tiles.onload = function () {
+    };
+
+    world.src = 'tilesets/world.png';
+    world.onload = function () {
+        updatestate();
+    };    
+}
+
+function refreshTools()
+{
+    toolcanvas.drawImage(tiles,0,0);
+    for(var i=0;i<tilecntY;i++){
+        toolcanvas.beginPath();
+        toolcanvas.moveTo(i*tilesize,0);
+        toolcanvas.lineTo(i*tilesize,tilecntY*tilesize);
+        toolcanvas.moveTo(0,i*tilesize);
+        toolcanvas.lineTo(tilecntX*tilesize,i*tilesize);
+        toolcanvas.stroke();
+    }
+}
+
+function updatestate()
+{
+    // World to the left and tiles to the right
+    c.drawImage(world,0,0);
+    toolcanvas.drawImage(tiles,0,0);
+
+    var mapcntX=66;
+    var mapcntY=84
+
+    // Find map tiles in image
+    for(sourceY=0;sourceY<mapcntY;sourceY++){
+        for(sourceX=0;sourceX<mapcntX;sourceX++){
+            var tile=c.getImageData(sourceX*16, sourceY*16, 16, 16);
+
+            var diffMin=100000;
+            for(tileX=0;tileX<20;tileX++){    
+                for(tileY=0;tileY<20;tileY++){
+                    var diff=0;
+                    var tooltile=toolcanvas.getImageData((tileX*17)+1,(tileY*17)+1,16,16);
+                    for(var i=0;i<(tilesize*tilesize*4);i++){
+                        if((i%4)<2) diff+=Math.abs(tile.data[i]-tooltile.data[i]);
+                    }
+                    if(diff<diffMin){
+                        diffMin=diff;
+                        diffX=tileX;
+                        diffY=tileY;
+                    }
+                }
+            }
+
+            // We found a minimum diff. If none is found we color that square black
+            if(diffMin!=0){
+                tilemap[(sourceY*mapcntX)+sourceX]=372;            
+            }else{
+                tilemap[(sourceY*mapcntX)+sourceX]=((diffY*20)+diffX);            
+            }
+        }
+    }
+    
+    var str="[";
+    for(var i=0;i<tilemap.length;i++){
+        if((i%66)==0) str+="\n";
+        str+=","+tilemap[i];
+    }
+    str+="]";
+    console.log(str);
+
+}
+
+function toolup(e)
+{
+
+}
+
+function tooldown(e)
+{
+
+}
+
+function toolmove(e)
+{
+/*
+  var rect = document.getElementById("toolCanvas").getBoundingClientRect();
+  var xk=(e.clientX-rect.left);
+  var yk=(e.clientY-rect.top);
+  toolcanvas.beginPath();
+  toolcanvas.moveTo(0,0);
+  toolcanvas.lineTo(xk,yk);
+  toolcanvas.stroke();
+*/
+}
+
+		</script>
+</head>
+<body onload="zetup();">
+
+  <div id="wrapper">
+ 	<canvas id="myCanvas" width="1056" height="900" style="border:1px solid #000000;"></canvas> 
+ 	<canvas id="toolCanvas" width="1024" height="1024" style="border:1px solid #000000;" onmousedown="tooldown(event);" onmouseup="toolup(event);" onmousemove="toolmove(event);"></canvas> 
+  </div>
+</body>

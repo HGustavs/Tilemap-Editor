@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #wrapper{
+            display:grid;
+            grid-template-areas: "main tools";
+        }
+
+        #myCanvas{
+            grid-area:main;
+        }
+
+        #toolsCanvas{
+            grid-area:tools;
+        }
+        
+    </style>
+    <script>document.write("<script type='text/javascript' src='tilemap.js?t=" + Date.now() + "'><\/script>");</script>
+		<script>
+var c;
+var mx,my,mb=0;
+
+var tilesize=51;
+var tilecntX=20;
+var tilecntY=20;
+var tiles = new Image();
+var screentiles=16;
+var maptiles=66;
+
+var scrollX=0;
+var scrollY=0;
+
+// Draw a single tile from tilemap
+function drawTile(tileno,dx,dy,tileimg)
+{
+    var tileX=tileno%tilecntX;
+    var tileY=Math.floor(tileno/tilecntX);
+
+    c.drawImage(tileimg, tileX*tilesize, tileY*tilesize, tilesize, tilesize, dx, dy, tilesize, tilesize)
+}
+
+function drawtilemap()
+{
+    // We iterate over screentiles +1 tiles
+    var scx=Math.floor((scrollX/tilesize));
+    var scy=Math.floor((scrollY/tilesize));
+    var offsX=scrollX%tilesize;
+    var offsY=scrollY%tilesize;
+    for(var i=0;i<(screentiles+1);i++){
+        for(var j=0;j<(screentiles+1);j++){
+            drawTile(tilemap[((scy+i)*maptiles)+(scx+j)],(j*tilesize)-offsX,(i*tilesize)-offsY,tiles);
+        }
+    }
+}
+
+function zetup()
+{
+    var cc = document.getElementById("myCanvas");
+    c = cc.getContext("2d");
+
+    var cc = document.getElementById("toolCanvas");
+    toolcanvas = cc.getContext("2d");
+
+    tiles.src = 'tilesets/test.png';
+    //drawing of the test image - img1
+    tiles.onload = function () {
+        updatestate();
+    };
+
+//    setTimeout(scrollCode, 30);
+}
+
+function scrollCode()
+{
+    scrollX+=1;
+    drawtilemap();
+//    setTimeout(scrollCode, 3);
+}
+
+function refreshTools()
+{
+    toolcanvas.drawImage(tiles,0,0);
+    for(var i=0;i<tilecntY;i++){
+        toolcanvas.beginPath();
+        toolcanvas.moveTo(i*tilesize,0);
+        toolcanvas.lineTo(i*tilesize,tilecntY*tilesize);
+        toolcanvas.moveTo(0,i*tilesize);
+        toolcanvas.lineTo(tilecntX*tilesize,i*tilesize);
+        toolcanvas.stroke();
+    }
+}
+
+function updatestate()
+{
+    drawtilemap();
+    refreshTools();
+}
+
+function toolup(e)
+{
+
+}
+
+function tooldown(e)
+{
+
+}
+
+function toolmove(e)
+{
+  var rect = document.getElementById("toolCanvas").getBoundingClientRect();
+  var xk=(e.clientX-rect.left);
+  var yk=(e.clientY-rect.top);
+  scrollX=xk;
+  scrollY=yk;
+  drawtilemap();
+}
+
+		</script>
+</head>
+<body onload="zetup();">
+
+  <div id="wrapper">
+ 	<canvas id="myCanvas" width="816" height="816" style="border:1px solid #000000;"></canvas> 
+ 	<canvas id="toolCanvas" width="1024" height="1024" style="border:1px solid #000000;" onmousedown="tooldown(event);" onmouseup="toolup(event);" onmousemove="toolmove(event);"></canvas> 
+  </div>
+</body>
