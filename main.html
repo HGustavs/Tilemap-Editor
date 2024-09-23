@@ -18,12 +18,19 @@
     </style>
     <script>document.write("<script type='text/javascript' src='tilemap.js?t=" + Date.now() + "'><\/script>");</script>
 		<script>
+
+// https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas
+// https://webrtc.ventures/2022/02/offscreen-canvas-api/
+// https://stackoverflow.com/questions/60870336/understanding-offscreen-canvas-to-better-performance
+// https://github.com/mozdevs/gamedev-js-tiles/tree/gh-pages?tab=readme-ov-file
+// https://developer.mozilla.org/en-US/docs/Games/Techniques/Tilemaps#performance
+
 var c;
 var mx,my,mb=0;
 
 var tilesize=51;
 var tilecntX=20;
-var tilecntY=20;
+var tilecntY=19;
 var tiles = new Image();
 var screentiles=16;
 var maptiles=66;
@@ -96,6 +103,22 @@ function zetup()
     document.addEventListener("keydown", keyDownOwn, false);
     document.addEventListener("keyup", keyUpOwn, false);
 
+var doScroll = function(e) {
+
+    if(event.target.id=="myCanvas"){
+        scrollX+=e.deltaX;
+        scrollY+=e.deltaY;
+        redraw=true;
+
+        e.preventDefault();    
+    }
+
+};
+
+if (window.addEventListener) {
+  window.addEventListener("wheel", doScroll, { passive: false });
+}
+
     window.requestAnimationFrame(refresh);
 }
 
@@ -104,11 +127,14 @@ function refresh()
     if(keyspressed["ArrowUp"]){
         scrollY--;
         if(scrollY<0) scrollY=0;
-    }else if(keyspressed["ArrowDown"]){
+    }
+    if(keyspressed["ArrowDown"]){
         scrollY++;
-    }else if(keyspressed["ArrowLeft"]){
+    }
+    if(keyspressed["ArrowRight"]){
         scrollX++;
-    }else if(keyspressed["ArrowRight"]){
+    }
+    if(keyspressed["ArrowLeft"]){
         scrollX--;
         if(scrollX<0) scrollX=0;        
     }
@@ -127,13 +153,20 @@ function refresh()
 function refreshTools()
 {
     toolcanvas.drawImage(tiles,0,0,512,512);
-    var tooltilesize=Math.floor(tilesize*0.5);
+    var tooltilesizeX=512/tilecntX;
+    var tooltilesizeY=512/tilecntY;
+    toolcanvas.globalAlpha=0.4;
+    toolcanvas.strokeStyle="#8f8";
+    for(var i=0;i<tilecntX;i++){
+        toolcanvas.beginPath();
+        toolcanvas.moveTo(i*tooltilesizeX,0);
+        toolcanvas.lineTo(i*tooltilesizeX,tilecntX*tooltilesizeX);
+        toolcanvas.stroke();
+    }
     for(var i=0;i<tilecntY;i++){
         toolcanvas.beginPath();
-        toolcanvas.moveTo(i*tooltilesize,0);
-        toolcanvas.lineTo(i*tooltilesize,tilecntY*tooltilesize);
-        toolcanvas.moveTo(0,i*tooltilesize);
-        toolcanvas.lineTo(tilecntX*tooltilesize,i*tooltilesize);
+        toolcanvas.moveTo(0,i*tooltilesizeY);
+        toolcanvas.lineTo(tilecntY*tooltilesizeY,i*tooltilesizeY);
         toolcanvas.stroke();
     }
 }
@@ -166,7 +199,7 @@ function toolmove(e)
 <body onload="zetup();">
 
   <div id="wrapper">
- 	<canvas id="myCanvas" width="816" height="816" style="border:1px solid #000000;"></canvas> 
+ 	<canvas id="myCanvas" width="816" height="816" style="border:1px solid #000000;" ></canvas> 
  	<canvas id="toolCanvas" width="1024" height="1024" style="border:1px solid #000000;" onmousedown="tooldown(event);" onmouseup="toolup(event);" onmousemove="toolmove(event);"></canvas> 
   </div>
 </body>
