@@ -31,6 +31,10 @@ var maptiles=66;
 var scrollX=0;
 var scrollY=0;
 
+var redraw=true;
+
+var keyspressed=[];
+
 // Draw a single tile from tilemap
 function drawTile(tileno,dx,dy,tileimg)
 {
@@ -54,6 +58,27 @@ function drawtilemap()
     }
 }
 
+function keyDownOwn(event)
+{
+    keyspressed[event.key]=true;
+
+    if(event.key=="ArrowUp"||event.key=="ArrowDown"||event.key=="ArrowLeft"||event.key=="ArrowRight"){
+        event.preventDefault();
+        return false;
+    }
+}
+
+function keyUpOwn(event)
+{
+    keyspressed[event.key]=false;
+
+    if(event.key=="ArrowUp"||event.key=="ArrowDown"||event.key=="ArrowLeft"||event.key=="ArrowRight"){
+        event.preventDefault();
+        return false;
+    }
+
+}
+
 function zetup()
 {
     var cc = document.getElementById("myCanvas");
@@ -68,25 +93,47 @@ function zetup()
         updatestate();
     };
 
-//    setTimeout(scrollCode, 30);
+    document.addEventListener("keydown", keyDownOwn, false);
+    document.addEventListener("keyup", keyUpOwn, false);
+
+    window.requestAnimationFrame(refresh);
 }
 
-function scrollCode()
+function refresh()
 {
-    scrollX+=1;
-    drawtilemap();
-//    setTimeout(scrollCode, 3);
+    if(keyspressed["ArrowUp"]){
+        scrollY--;
+        if(scrollY<0) scrollY=0;
+    }else if(keyspressed["ArrowDown"]){
+        scrollY++;
+    }else if(keyspressed["ArrowLeft"]){
+        scrollX++;
+    }else if(keyspressed["ArrowRight"]){
+        scrollX--;
+        if(scrollX<0) scrollX=0;        
+    }
+
+    if(keyspressed["ArrowUp"]||keyspressed["ArrowDown"]||keyspressed["ArrowLeft"]||keyspressed["ArrowRight"]){
+        redraw=true;
+    }
+    
+    if(redraw){
+        drawtilemap();
+        redraw=false;
+    }
+    window.requestAnimationFrame(refresh);
 }
 
 function refreshTools()
 {
-    toolcanvas.drawImage(tiles,0,0);
+    toolcanvas.drawImage(tiles,0,0,512,512);
+    var tooltilesize=Math.floor(tilesize*0.5);
     for(var i=0;i<tilecntY;i++){
         toolcanvas.beginPath();
-        toolcanvas.moveTo(i*tilesize,0);
-        toolcanvas.lineTo(i*tilesize,tilecntY*tilesize);
-        toolcanvas.moveTo(0,i*tilesize);
-        toolcanvas.lineTo(tilecntX*tilesize,i*tilesize);
+        toolcanvas.moveTo(i*tooltilesize,0);
+        toolcanvas.lineTo(i*tooltilesize,tilecntY*tooltilesize);
+        toolcanvas.moveTo(0,i*tooltilesize);
+        toolcanvas.lineTo(tilecntX*tooltilesize,i*tooltilesize);
         toolcanvas.stroke();
     }
 }
@@ -112,9 +159,6 @@ function toolmove(e)
   var rect = document.getElementById("toolCanvas").getBoundingClientRect();
   var xk=(e.clientX-rect.left);
   var yk=(e.clientY-rect.top);
-  scrollX=xk;
-  scrollY=yk;
-  drawtilemap();
 }
 
 		</script>
