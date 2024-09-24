@@ -25,42 +25,66 @@
 // https://github.com/mozdevs/gamedev-js-tiles/tree/gh-pages?tab=readme-ov-file
 // https://developer.mozilla.org/en-US/docs/Games/Techniques/Tilemaps#performance
 
+// Scrollable 2D Camera
+class Camera2D {
+
+    constructor(tilesize,tilecntX,tilecntY,maptilesX,maptilesY,screenTiles)
+    {
+          this.tileSize = tilesize;
+          this.tilecntX = tilecntX;
+          this.tilecntY = tilecntY;
+          this.maptilesX = maptilesX;
+          this.maptilesY = maptilesY;
+          this.screenTiles = screenTiles;
+          this.scrollX = 0;
+          this.scrollY = 0;
+    }
+
+    scroll(offsX,offsY)
+    {
+        this.scrollX+=offsX;
+        this.scrollY+=offsY;
+        if(this.scrollX<0) this.scrollX=0;
+        if(this.scrollY<0) this.scrollY=0;
+        if(this.scrollX>((this.maptilesX-this.screenTiles)*this.tileSize)) this.scrollX=(this.maptilesX-this.screenTiles)*this.tileSize;
+        if(this.scrollY>((this.maptilesY-this.screenTiles)*this.tileSize)) this.scrollY=(this.maptilesY-this.screenTiles)*this.tileSize;
+    }  
+}
+
+// Tilemap Class
+
+var camera=new Camera2D(51,20,19,66,84,16);
+console.log(camera.scrollX);
+
 var c;
-var mx,my,mb=0;
 
-var tilesize=51;
-var tilecntX=20;
-var tilecntY=19;
 var tiles = new Image();
-var screentiles=16;
-var maptiles=66;
-
-var scrollX=0;
-var scrollY=0;
-
 var redraw=true;
-
 var keyspressed=[];
+
+// Camera Singleton Object 
+// ScrollX / Scroll Y / Tile Size
 
 // Draw a single tile from tilemap
 function drawTile(tileno,dx,dy,tileimg)
 {
-    var tileX=tileno%tilecntX;
-    var tileY=Math.floor(tileno/tilecntX);
+    var tileX=tileno%camera.tilecntX;
+    var tileY=Math.floor(tileno/camera.tilecntX);
 
-    c.drawImage(tileimg, tileX*tilesize, tileY*tilesize, tilesize, tilesize, dx, dy, tilesize, tilesize)
+    c.drawImage(tileimg, tileX*camera.tileSize, tileY*camera.tileSize, camera.tileSize, camera.tileSize, dx, dy, camera.tileSize, camera.tileSize)
 }
 
 function drawtilemap()
 {
     // We iterate over screentiles +1 tiles
-    var scx=Math.floor((scrollX/tilesize));
-    var scy=Math.floor((scrollY/tilesize));
-    var offsX=scrollX%tilesize;
-    var offsY=scrollY%tilesize;
-    for(var i=0;i<(screentiles+1);i++){
-        for(var j=0;j<(screentiles+1);j++){
-            drawTile(tilemap[((scy+i)*maptiles)+(scx+j)],(j*tilesize)-offsX,(i*tilesize)-offsY,tiles);
+    var scx=Math.floor((camera.scrollX/camera.tileSize));
+    var scy=Math.floor((camera.scrollY/camera.tileSize));
+    var offsX=camera.scrollX%camera.tileSize;
+    var offsY=camera.scrollY%camera.tileSize;
+    for(var i=0;i<(camera.screenTiles+1);i++){
+        for(var j=0;j<(camera.screenTiles+1);j++){
+            console.log(tilemap[((scy+i)*camera.maptilesX)+(scx+j)],(j*camera.tileSize)-offsX,(i*camera.tileSize)-offsY,tiles);
+            drawTile(tilemap[((scy+i)*camera.maptilesX)+(scx+j)],(j*camera.tileSize)-offsX,(i*camera.tileSize)-offsY,tiles);
         }
     }
 }
@@ -106,8 +130,7 @@ function zetup()
 var doScroll = function(e) {
 
     if(event.target.id=="myCanvas"){
-        scrollX+=e.deltaX;
-        scrollY+=e.deltaY;
+        camera.scroll(e.deltaX,e.deltaY);
         redraw=true;
 
         e.preventDefault();    
@@ -125,18 +148,16 @@ if (window.addEventListener) {
 function refresh()
 {
     if(keyspressed["ArrowUp"]){
-        scrollY--;
-        if(scrollY<0) scrollY=0;
+        camera.scroll(0,-1);
     }
     if(keyspressed["ArrowDown"]){
-        scrollY++;
+        camera.scroll(0,1);
     }
     if(keyspressed["ArrowRight"]){
-        scrollX++;
+        camera.scroll(1,0);
     }
     if(keyspressed["ArrowLeft"]){
-        scrollX--;
-        if(scrollX<0) scrollX=0;        
+        camera.scroll(-1,0);
     }
 
     if(keyspressed["ArrowUp"]||keyspressed["ArrowDown"]||keyspressed["ArrowLeft"]||keyspressed["ArrowRight"]){
@@ -153,20 +174,20 @@ function refresh()
 function refreshTools()
 {
     toolcanvas.drawImage(tiles,0,0,512,512);
-    var tooltilesizeX=512/tilecntX;
-    var tooltilesizeY=512/tilecntY;
+    var tooltilesizeX=512/camera.tilecntX;
+    var tooltilesizeY=512/camera.tilecntY;
     toolcanvas.globalAlpha=0.4;
     toolcanvas.strokeStyle="#8f8";
-    for(var i=0;i<tilecntX;i++){
+    for(var i=0;i<camera.tilecntX;i++){
         toolcanvas.beginPath();
         toolcanvas.moveTo(i*tooltilesizeX,0);
-        toolcanvas.lineTo(i*tooltilesizeX,tilecntX*tooltilesizeX);
+        toolcanvas.lineTo(i*tooltilesizeX,camera.tilecntX*tooltilesizeX);
         toolcanvas.stroke();
     }
-    for(var i=0;i<tilecntY;i++){
+    for(var i=0;i<camera.tilecntY;i++){
         toolcanvas.beginPath();
         toolcanvas.moveTo(0,i*tooltilesizeY);
-        toolcanvas.lineTo(tilecntY*tooltilesizeY,i*tooltilesizeY);
+        toolcanvas.lineTo(camera.tilecntY*tooltilesizeY,i*tooltilesizeY);
         toolcanvas.stroke();
     }
 }
