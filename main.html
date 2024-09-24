@@ -25,69 +25,80 @@
 // https://github.com/mozdevs/gamedev-js-tiles/tree/gh-pages?tab=readme-ov-file
 // https://developer.mozilla.org/en-US/docs/Games/Techniques/Tilemaps#performance
 
-// Scrollable 2D Camera
-class Camera2D {
-
-    constructor(tilesize,tilecntX,tilecntY,maptilesX,maptilesY,screenTiles)
+// Tilemap Class. Image file tile size, tile count of map and tile count of image
+class Tilemap {
+    constructor(tilesize,tilecntX,tilecntY,maptilesX,maptilesY,image)
     {
           this.tileSize = tilesize;
           this.tilecntX = tilecntX;
           this.tilecntY = tilecntY;
           this.maptilesX = maptilesX;
           this.maptilesY = maptilesY;
+          this.image=image;
+    }
+
+    // Draw a single tile from tilemap
+    drawTile(tileno,dx,dy,canv)
+    {
+        var tileX=tileno%this.tilecntX;
+        var tileY=Math.floor(tileno/this.tilecntX);
+
+        canv.drawImage(this.image, tileX*this.tileSize, tileY*this.tileSize, this.tileSize, this.tileSize, dx, dy, this.tileSize, this.tileSize)
+    }
+
+    // Redraw this tilemap into the given canvas
+    drawTilemap(canv,camera)
+    {
+        // We iterate over screentiles +1 tiles
+        var scx=Math.floor((camera.scrollX/this.tileSize));
+        var scy=Math.floor((camera.scrollY/this.tileSize));
+        var offsX=camera.scrollX%this.tileSize;
+        var offsY=camera.scrollY%this.tileSize;
+        for(var i=0;i<(camera.screenTiles+1);i++){
+            for(var j=0;j<(camera.screenTiles+1);j++){
+                this.drawTile(tilemap[((scy+i)*this.maptilesX)+(scx+j)],(j*this.tileSize)-offsX,(i*this.tileSize)-offsY,canv);
+            }
+        }
+    }    
+}
+
+// Scrollable 2D Camera
+class Camera2D {
+
+    constructor(screenTiles)
+    {
           this.screenTiles = screenTiles;
           this.scrollX = 0;
           this.scrollY = 0;
     }
 
-    scroll(offsX,offsY)
+    scroll(offsX,offsY,tilemap)
     {
         this.scrollX+=offsX;
         this.scrollY+=offsY;
         if(this.scrollX<0) this.scrollX=0;
         if(this.scrollY<0) this.scrollY=0;
-        if(this.scrollX>((this.maptilesX-this.screenTiles)*this.tileSize)) this.scrollX=(this.maptilesX-this.screenTiles)*this.tileSize;
-        if(this.scrollY>((this.maptilesY-this.screenTiles)*this.tileSize)) this.scrollY=(this.maptilesY-this.screenTiles)*this.tileSize;
+        if(this.scrollX>((tilemap.maptilesX-this.screenTiles)*tilemap.tileSize)) this.scrollX=(tilemap.maptilesX-this.screenTiles)*tilemap.tileSize;
+        if(this.scrollY>((tilemap.maptilesY-this.screenTiles)*tilemap.tileSize)) this.scrollY=(tilemap.maptilesY-this.screenTiles)*tilemap.tileSize;
     }  
 }
 
-// Tilemap Class
-
-var camera=new Camera2D(51,20,19,66,84,16);
-console.log(camera.scrollX);
+var camera=new Camera2D(16);
+var mainmap;
 
 var c;
 
-var tiles = new Image();
 var redraw=true;
 var keyspressed=[];
 
-// Camera Singleton Object 
-// ScrollX / Scroll Y / Tile Size
-
-// Draw a single tile from tilemap
-function drawTile(tileno,dx,dy,tileimg)
+function doScroll(e)
 {
-    var tileX=tileno%camera.tilecntX;
-    var tileY=Math.floor(tileno/camera.tilecntX);
-
-    c.drawImage(tileimg, tileX*camera.tileSize, tileY*camera.tileSize, camera.tileSize, camera.tileSize, dx, dy, camera.tileSize, camera.tileSize)
-}
-
-function drawtilemap()
-{
-    // We iterate over screentiles +1 tiles
-    var scx=Math.floor((camera.scrollX/camera.tileSize));
-    var scy=Math.floor((camera.scrollY/camera.tileSize));
-    var offsX=camera.scrollX%camera.tileSize;
-    var offsY=camera.scrollY%camera.tileSize;
-    for(var i=0;i<(camera.screenTiles+1);i++){
-        for(var j=0;j<(camera.screenTiles+1);j++){
-            console.log(tilemap[((scy+i)*camera.maptilesX)+(scx+j)],(j*camera.tileSize)-offsX,(i*camera.tileSize)-offsY,tiles);
-            drawTile(tilemap[((scy+i)*camera.maptilesX)+(scx+j)],(j*camera.tileSize)-offsX,(i*camera.tileSize)-offsY,tiles);
-        }
+    if(event.target.id=="myCanvas"){
+        camera.scroll(e.deltaX,e.deltaY,mainmap);
+        redraw=true;
+        e.preventDefault();    
     }
-}
+};
 
 function keyDownOwn(event)
 {
@@ -118,29 +129,18 @@ function zetup()
     var cc = document.getElementById("toolCanvas");
     toolcanvas = cc.getContext("2d");
 
+    var tiles = new Image();
     tiles.src = 'tilesets/test.png';
     //drawing of the test image - img1
     tiles.onload = function () {
-        updatestate();
+        mainmap = new Tilemap(51.2,20,19,66,84,tiles);
+        redraw=true;
+        refresh();
     };
 
     document.addEventListener("keydown", keyDownOwn, false);
     document.addEventListener("keyup", keyUpOwn, false);
-
-var doScroll = function(e) {
-
-    if(event.target.id=="myCanvas"){
-        camera.scroll(e.deltaX,e.deltaY);
-        redraw=true;
-
-        e.preventDefault();    
-    }
-
-};
-
-if (window.addEventListener) {
-  window.addEventListener("wheel", doScroll, { passive: false });
-}
+    window.addEventListener("wheel", doScroll, { passive: false });
 
     window.requestAnimationFrame(refresh);
 }
@@ -148,16 +148,16 @@ if (window.addEventListener) {
 function refresh()
 {
     if(keyspressed["ArrowUp"]){
-        camera.scroll(0,-1);
+        camera.scroll(0,-1,mainmap);
     }
     if(keyspressed["ArrowDown"]){
-        camera.scroll(0,1);
+        camera.scroll(0,1,mainmap);
     }
     if(keyspressed["ArrowRight"]){
-        camera.scroll(1,0);
+        camera.scroll(1,0,mainmap);
     }
     if(keyspressed["ArrowLeft"]){
-        camera.scroll(-1,0);
+        camera.scroll(-1,0,mainmap);
     }
 
     if(keyspressed["ArrowUp"]||keyspressed["ArrowDown"]||keyspressed["ArrowLeft"]||keyspressed["ArrowRight"]){
@@ -165,7 +165,7 @@ function refresh()
     }
     
     if(redraw){
-        drawtilemap();
+        if(mainmap!=null) mainmap.drawTilemap(c,camera);
         redraw=false;
     }
     window.requestAnimationFrame(refresh);
@@ -194,7 +194,6 @@ function refreshTools()
 
 function updatestate()
 {
-    drawtilemap();
     refreshTools();
 }
 
