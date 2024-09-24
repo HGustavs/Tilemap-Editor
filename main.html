@@ -78,8 +78,8 @@ class Camera2D {
         this.scrollY+=offsY;
         if(this.scrollX<0) this.scrollX=0;
         if(this.scrollY<0) this.scrollY=0;
-        if(this.scrollX>((tilemap.maptilesX-this.screenTiles-1)*tilemap.tileSize)) this.scrollX=(tilemap.maptilesX-this.screenTiles-1)*tilemap.tileSize;
-        if(this.scrollY>((tilemap.maptilesY-this.screenTiles-1)*tilemap.tileSize)) this.scrollY=(tilemap.maptilesY-this.screenTiles-1)*tilemap.tileSize;
+        if(this.scrollX>((tilemap.maptilesX-this.screenTiles-3)*tilemap.tileSize)) this.scrollX=(tilemap.maptilesX-this.screenTiles-3)*tilemap.tileSize;
+        if(this.scrollY>((tilemap.maptilesY-this.screenTiles-3)*tilemap.tileSize)) this.scrollY=(tilemap.maptilesY-this.screenTiles-3)*tilemap.tileSize;
     }  
 }
 
@@ -133,16 +133,14 @@ function zetup()
     tiles.src = 'tilesets/test.png';
     //drawing of the test image - img1
     tiles.onload = function () {
-        mainmap = new Tilemap(51.2,20,19,66,84,tiles);
+        mainmap = new Tilemap(51,20,19,66,84,tiles);
         redraw=true;
-        refresh();
+        window.requestAnimationFrame(refresh);
     };
 
     document.addEventListener("keydown", keyDownOwn, false);
     document.addEventListener("keyup", keyUpOwn, false);
     window.addEventListener("wheel", doScroll, { passive: false });
-
-    window.requestAnimationFrame(refresh);
 }
 
 function refresh()
@@ -165,7 +163,9 @@ function refresh()
     }
     
     if(redraw){
-        if(mainmap!=null) mainmap.drawTilemap(c,camera);
+        if(mainmap!=null){
+          mainmap.drawTilemap(c,camera);
+        }
         redraw=false;
     }
     window.requestAnimationFrame(refresh);
@@ -173,30 +173,25 @@ function refresh()
 
 function refreshTools()
 {
-    toolcanvas.drawImage(tiles,0,0,512,512);
-    var tooltilesizeX=512/camera.tilecntX;
-    var tooltilesizeY=512/camera.tilecntY;
+    toolcanvas.drawImage(mainmap.image,0,0,512,512);
+    var tooltilesizeX=512/mainmap.tilecntX;
+    var tooltilesizeY=512/mainmap.tilecntY;
     toolcanvas.globalAlpha=0.4;
     toolcanvas.strokeStyle="#8f8";
-    for(var i=0;i<camera.tilecntX;i++){
+    for(var i=0;i<mainmap.tilecntX;i++){
         toolcanvas.beginPath();
         toolcanvas.moveTo(i*tooltilesizeX,0);
-        toolcanvas.lineTo(i*tooltilesizeX,camera.tilecntX*tooltilesizeX);
+        toolcanvas.lineTo(i*tooltilesizeX,mainmap.tilecntX*tooltilesizeX);
         toolcanvas.stroke();
     }
-    for(var i=0;i<camera.tilecntY;i++){
+    for(var i=0;i<mainmap.tilecntY;i++){
         toolcanvas.beginPath();
         toolcanvas.moveTo(0,i*tooltilesizeY);
-        toolcanvas.lineTo(camera.tilecntY*tooltilesizeY,i*tooltilesizeY);
+        toolcanvas.lineTo(mainmap.tilecntY*tooltilesizeY,i*tooltilesizeY);
         toolcanvas.stroke();
     }
 }
-
-function updatestate()
-{
-    refreshTools();
-}
-
+    
 function toolup(e)
 {
 
