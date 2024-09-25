@@ -14,10 +14,28 @@
         #toolsCanvas{
             grid-area:tools;
         }
-        
+
+        #infobar{
+            z-index:400;
+            position:absolute;
+            left:0px;
+            top:0px;
+        }
     </style>
     <script>document.write("<script type='text/javascript' src='tilemap.js?t=" + Date.now() + "'><\/script>");</script>
 		<script>
+
+// -------------------------------------------------------------------------------------------------------
+// --------------------=============######## TileMap Application ########=============--------------------
+// -------------------------------------------------------------------------------------------------------
+//  Copyright HGustavs 
+//
+//        (\ /)                        (\(\
+//        (. .)づ                      (-ㅅ-)
+//       c(")(")    ∴                o_(”)(”)
+//--------------------------------------------------------------------------------------------------------			
+
+// --------------------=============######## References ########=============--------------------
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas
 // https://webrtc.ventures/2022/02/offscreen-canvas-api/
@@ -25,9 +43,14 @@
 // https://github.com/mozdevs/gamedev-js-tiles/tree/gh-pages?tab=readme-ov-file
 // https://developer.mozilla.org/en-US/docs/Games/Techniques/Tilemaps#performance
 
-// Tilemap Class. Image file tile size, tile count of map and tile count of image
+// --------------------=============######## Classes ########=============--------------------
+
+//------------------------------------------------------------------------------------------
+// Tilemap - Tilemap Class. Image file tile size, tile count of map and tile count of image
+//-------------------------------------------------------------------------------------------
+
 class Tilemap {
-    constructor(tilesize,tilecntX,tilecntY,maptilesX,maptilesY,image)
+    constructor(tilesize,tilecntX,tilecntY,maptilesX,maptilesY,image,tilemap)
     {
           this.tileSize = tilesize;
           this.tilecntX = tilecntX;
@@ -35,6 +58,18 @@ class Tilemap {
           this.maptilesX = maptilesX;
           this.maptilesY = maptilesY;
           this.image=image;
+          this.tilemap=tilemap;
+    }
+
+    // Mouse Click in Tilemap - Pixel in Tilemap
+    updateTile(tileno,dx,dy,camera)
+    {
+        dx=Math.floor((dx+camera.scrollX)/this.tileSize);
+        dy=Math.floor((dy+camera.scrollY)/this.tileSize);
+        
+        this.tilemap[(dy*this.maptilesX)+dx]=tileno;
+
+        redraw=true;
     }
 
     // Draw a single tile from tilemap
@@ -56,13 +91,16 @@ class Tilemap {
         var offsY=camera.scrollY%this.tileSize;
         for(var i=0;i<(camera.screenTiles+1);i++){
             for(var j=0;j<(camera.screenTiles+1);j++){
-                this.drawTile(tilemap[((scy+i)*this.maptilesX)+(scx+j)],(j*this.tileSize)-offsX,(i*this.tileSize)-offsY,canv);
+                this.drawTile(this.tilemap[((scy+i)*this.maptilesX)+(scx+j)],(j*this.tileSize)-offsX,(i*this.tileSize)-offsY,canv);
             }
         }
     }    
 }
 
-// Scrollable 2D Camera
+//------------------------------------------------------------------------------------------
+// Camera2D - Scrollable 2D Camera
+//-------------------------------------------------------------------------------------------
+
 class Camera2D {
 
     constructor(screenTiles)
@@ -83,13 +121,15 @@ class Camera2D {
     }  
 }
 
+// --------------------=============######## Globals ########=============--------------------
+
 var camera=new Camera2D(16);
 var mainmap;
-
 var c;
-
 var redraw=true;
 var keyspressed=[];
+
+// --------------------=============######## Event Handlers ########=============--------------------
 
 function doScroll(e)
 {
@@ -118,7 +158,42 @@ function keyUpOwn(event)
         event.preventDefault();
         return false;
     }
+}
 
+function mainup(e)
+{
+
+}
+
+function maindown(e)
+{
+  var rect = document.getElementById("myCanvas").getBoundingClientRect();
+
+  mainmap.updateTile(133,e.clientX-rect.left,e.clientY-rect.top,camera);    
+}
+
+function mainmove(e)
+{
+  var rect = document.getElementById("toolCanvas").getBoundingClientRect();
+  var xk=(e.clientX-rect.left);
+  var yk=(e.clientY-rect.top);
+}
+
+function toolup(e)
+{
+    
+}
+
+function tooldown(e)
+{
+
+}
+
+function toolmove(e)
+{
+  var rect = document.getElementById("toolCanvas").getBoundingClientRect();
+  var xk=(e.clientX-rect.left);
+  var yk=(e.clientY-rect.top);
 }
 
 function zetup()
@@ -133,7 +208,7 @@ function zetup()
     tiles.src = 'tilesets/test.png';
     //drawing of the test image - img1
     tiles.onload = function () {
-        mainmap = new Tilemap(51,20,19,66,84,tiles);
+        mainmap = new Tilemap(51,20,19,66,84,tiles,tilemap);
         redraw=true;
         window.requestAnimationFrame(refresh);
     };
@@ -165,56 +240,41 @@ function refresh()
     if(redraw){
         if(mainmap!=null){
           mainmap.drawTilemap(c,camera);
+          refreshTools(mainmap);
         }
         redraw=false;
     }
     window.requestAnimationFrame(refresh);
 }
 
-function refreshTools()
+function refreshTools(tilemap)
 {
-    toolcanvas.drawImage(mainmap.image,0,0,512,512);
-    var tooltilesizeX=512/mainmap.tilecntX;
-    var tooltilesizeY=512/mainmap.tilecntY;
+    toolcanvas.drawImage(tilemap.image,0,0,512,512);
+    var tooltilesizeX=512/tilemap.tilecntX;
+    var tooltilesizeY=512/tilemap.tilecntY;
     toolcanvas.globalAlpha=0.4;
     toolcanvas.strokeStyle="#8f8";
-    for(var i=0;i<mainmap.tilecntX;i++){
+    for(var i=0;i<tilemap.tilecntX;i++){
         toolcanvas.beginPath();
         toolcanvas.moveTo(i*tooltilesizeX,0);
-        toolcanvas.lineTo(i*tooltilesizeX,mainmap.tilecntX*tooltilesizeX);
+        toolcanvas.lineTo(i*tooltilesizeX,tilemap.tilecntX*tooltilesizeX);
         toolcanvas.stroke();
     }
-    for(var i=0;i<mainmap.tilecntY;i++){
+    for(var i=0;i<tilemap.tilecntY;i++){
         toolcanvas.beginPath();
         toolcanvas.moveTo(0,i*tooltilesizeY);
-        toolcanvas.lineTo(mainmap.tilecntY*tooltilesizeY,i*tooltilesizeY);
+        toolcanvas.lineTo(tilemap.tilecntY*tooltilesizeY,i*tooltilesizeY);
         toolcanvas.stroke();
     }
-}
-    
-function toolup(e)
-{
-
-}
-
-function tooldown(e)
-{
-
-}
-
-function toolmove(e)
-{
-  var rect = document.getElementById("toolCanvas").getBoundingClientRect();
-  var xk=(e.clientX-rect.left);
-  var yk=(e.clientY-rect.top);
 }
 
 		</script>
 </head>
 <body onload="zetup();">
 
+  <div id="infobar"></div>
   <div id="wrapper">
- 	<canvas id="myCanvas" width="816" height="816" style="border:1px solid #000000;" ></canvas> 
- 	<canvas id="toolCanvas" width="1024" height="1024" style="border:1px solid #000000;" onmousedown="tooldown(event);" onmouseup="toolup(event);" onmousemove="toolmove(event);"></canvas> 
+ 	  <canvas id="myCanvas" width="816" height="816" style="border:1px solid #000000;" onmousedown="maindown(event);" onmouseup="mainup(event);" onmousemove="mainmove(event);" ></canvas> 
+ 	  <canvas id="toolCanvas" width="1024" height="1024" style="border:1px solid #000000;" onmousedown="tooldown(event);" onmouseup="toolup(event);" onmousemove="toolmove(event);"></canvas> 
   </div>
 </body>
