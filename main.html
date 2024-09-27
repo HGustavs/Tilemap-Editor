@@ -54,17 +54,21 @@ class Tilemap {
     // Tilecnt is in tile atlas and maptiles is in tile map array
     constructor(tilesize,tilecntX,tilecntY,maptilesX,maptilesY,image,tilemap,toolzoom)
     {
-          // 
+          // Attributes
           this.tileSize = tilesize;
           this.tilecntX = tilecntX;
           this.tilecntY = tilecntY;
           this.maptilesX = maptilesX;
           this.maptilesY = maptilesY;
-          this.toolzoom=toolzoom;
+          this.toolZoom=toolzoom;
+          
+          this.toolMoving=false;
           
           // Components
           this.image=image;
           this.tilemap=tilemap;
+          this.p1=null;
+          this.p2=null;
 
           // Computed
           this.toolwidth=Math.floor(tilecntX*tilesize*toolzoom);
@@ -80,6 +84,52 @@ class Tilemap {
         this.tilemap[(dy*this.maptilesX)+dx]=tileno;
 
         redraw=true;
+    }
+
+    // Mouse Move in tool Window
+    toolMove(mx,my,rx,ry)
+    {
+        if(this.toolMoving){
+            this.p2={x:Math.floor((mx-rx)/(this.tileSize*this.toolZoom)),y:Math.floor((my-ry)/(this.tileSize*this.toolZoom))};        
+            redraw=true;        
+        }
+    }
+
+    // Mouse Down in Tool Window
+    toolDown(mx,my,rx,ry)
+    {
+        this.p1={x:Math.floor((mx-rx)/(this.tileSize*this.toolZoom)),y:Math.floor((my-ry)/(this.tileSize*this.toolZoom))};
+        this.p2={x:Math.floor((mx-rx)/(this.tileSize*this.toolZoom)),y:Math.floor((my-ry)/(this.tileSize*this.toolZoom))};        
+        this.toolMoving=true;
+        redraw=true;        
+    }
+
+    // Mouse Up in Tool Window
+    toolUp(mx,my,rx,ry)
+    {
+        this.p2={x:Math.floor((mx-rx)/(this.tileSize*this.toolZoom)),y:Math.floor((my-ry)/(this.tileSize*this.toolZoom))};        
+
+        this.toolMoving=false;
+        redraw=true;
+    }
+
+    // drawBox draws a box when given two points
+    drawBox(p1,p2,linewidth,color,canv)
+    {
+        canv.beginPath();
+        canv.lineWidth=linewidth;
+        canv.strokeStyle=color;
+        var p1x=Math.min(p1.x*this.tileSize*this.toolZoom,p2.x*this.tileSize*this.toolZoom);
+        var p1y=Math.min(p1.y*this.tileSize*this.toolZoom,p2.y*this.tileSize*this.toolZoom);
+        var p2x=Math.max(p1.x*this.tileSize*this.toolZoom,p2.x*this.tileSize*this.toolZoom)+(this.tileSize*this.toolZoom);
+        var p2y=Math.max(p1.y*this.tileSize*this.toolZoom,p2.y*this.tileSize*this.toolZoom)+(this.tileSize*this.toolZoom);
+        canv.moveTo(p1x,p1y);
+        canv.lineTo(p2x,p1y);
+        canv.lineTo(p2x,p2y);
+        canv.lineTo(p1x,p2y);
+        canv.closePath();
+        canv.stroke();
+        canv.lineWidth=1.0;
     }
 
     // Refresh of tilemap to canvas
@@ -105,7 +155,12 @@ class Tilemap {
             }
         }
         toolcanv.stroke();
-        toolcanv.globalAlpha=1.0;    
+
+        // Thick yellow box surrounding selected tiles
+        if(this.p1!=null){
+            this.drawBox(this.p1,this.p2,3,"#ff8",toolcanv);
+        }
+        toolcanv.globalAlpha=1.0;            
     }
 
     // Draw a single tile from tilemap
@@ -204,7 +259,6 @@ function mainup(e)
 function maindown(e)
 {
   var rect = document.getElementById("myCanvas").getBoundingClientRect();
-
   mainmap.updateTile(133,e.clientX-rect.left,e.clientY-rect.top,camera);    
 }
 
@@ -217,19 +271,21 @@ function mainmove(e)
 
 function toolup(e)
 {
-    
+    var rect = document.getElementById("toolCanvas").getBoundingClientRect();
+    mainmap.toolUp(e.clientX,e.clientY,rect.left,rect.top);
 }
 
 function tooldown(e)
 {
+  var rect = document.getElementById("toolCanvas").getBoundingClientRect();
+  mainmap.toolDown(e.clientX,e.clientY,rect.left,rect.top);
 
 }
 
 function toolmove(e)
 {
   var rect = document.getElementById("toolCanvas").getBoundingClientRect();
-  var txk=(e.clientX-rect.left);
-  var tyk=(e.clientY-rect.top);
+  mainmap.toolMove(e.clientX,e.clientY,rect.left,rect.top);
 }
 
 function zetup()
