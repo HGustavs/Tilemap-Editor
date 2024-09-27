@@ -32,7 +32,7 @@
 //
 //        (\ /)                        (\(\
 //        (. .)づ                      (-ㅅ-)
-//       c(")(")    ∴                o_(”)(”)
+//       c(")(")    ∴                 c(”)(”)
 //--------------------------------------------------------------------------------------------------------			
 
 // --------------------=============######## References ########=============--------------------
@@ -50,15 +50,25 @@
 //-------------------------------------------------------------------------------------------
 
 class Tilemap {
-    constructor(tilesize,tilecntX,tilecntY,maptilesX,maptilesY,image,tilemap)
+
+    // Tilecnt is in tile atlas and maptiles is in tile map array
+    constructor(tilesize,tilecntX,tilecntY,maptilesX,maptilesY,image,tilemap,toolzoom)
     {
+          // 
           this.tileSize = tilesize;
           this.tilecntX = tilecntX;
           this.tilecntY = tilecntY;
           this.maptilesX = maptilesX;
           this.maptilesY = maptilesY;
+          this.toolzoom=toolzoom;
+          
+          // Components
           this.image=image;
           this.tilemap=tilemap;
+
+          // Computed
+          this.toolwidth=Math.floor(tilecntX*tilesize*toolzoom);
+          this.toolheight=Math.floor(tilecntY*tilesize*toolzoom);
     }
 
     // Mouse Click in Tilemap - Pixel in Tilemap
@@ -70,6 +80,32 @@ class Tilemap {
         this.tilemap[(dy*this.maptilesX)+dx]=tileno;
 
         redraw=true;
+    }
+
+    // Refresh of tilemap to canvas
+    drawToolView(toolcanv)
+    {
+        toolcanv.drawImage(this.image,0,0,this.toolwidth,this.toolheight);
+
+        var tooltilesizeX=this.toolwidth/this.tilecntX;
+        var tooltilesizeY=this.toolheight/this.tilecntY;
+        var tilecnt=Math.max(this.tilecntX,this.tilecntY);
+
+        toolcanv.globalAlpha=0.4;
+        toolcanv.strokeStyle="#8f8";
+        toolcanv.beginPath();
+        for(var i=0;i<tilecnt;i++){
+            if(i<this.tilecntY){
+                toolcanv.moveTo(0,i*tooltilesizeY);
+                toolcanv.lineTo(this.tilecntX*tooltilesizeX,i*tooltilesizeY);
+            }
+            if(i<this.tilecntX){
+                toolcanv.moveTo(i*tooltilesizeX,0);
+                toolcanv.lineTo(i*tooltilesizeX,this.tilecntY*tooltilesizeY);
+            }
+        }
+        toolcanv.stroke();
+        toolcanv.globalAlpha=1.0;    
     }
 
     // Draw a single tile from tilemap
@@ -192,8 +228,8 @@ function tooldown(e)
 function toolmove(e)
 {
   var rect = document.getElementById("toolCanvas").getBoundingClientRect();
-  var xk=(e.clientX-rect.left);
-  var yk=(e.clientY-rect.top);
+  var txk=(e.clientX-rect.left);
+  var tyk=(e.clientY-rect.top);
 }
 
 function zetup()
@@ -208,7 +244,7 @@ function zetup()
     tiles.src = 'tilesets/test.png';
     //drawing of the test image - img1
     tiles.onload = function () {
-        mainmap = new Tilemap(51,20,19,66,84,tiles,tilemap);
+        mainmap = new Tilemap(51,20,19,66,84,tiles,tilemap,0.5);
         redraw=true;
         window.requestAnimationFrame(refresh);
     };
@@ -240,32 +276,11 @@ function refresh()
     if(redraw){
         if(mainmap!=null){
           mainmap.drawTilemap(c,camera);
-          refreshTools(mainmap);
+          mainmap.drawToolView(toolcanvas);
         }
         redraw=false;
     }
     window.requestAnimationFrame(refresh);
-}
-
-function refreshTools(tilemap)
-{
-    toolcanvas.drawImage(tilemap.image,0,0,512,512);
-    var tooltilesizeX=512/tilemap.tilecntX;
-    var tooltilesizeY=512/tilemap.tilecntY;
-    toolcanvas.globalAlpha=0.4;
-    toolcanvas.strokeStyle="#8f8";
-    for(var i=0;i<tilemap.tilecntX;i++){
-        toolcanvas.beginPath();
-        toolcanvas.moveTo(i*tooltilesizeX,0);
-        toolcanvas.lineTo(i*tooltilesizeX,tilemap.tilecntX*tooltilesizeX);
-        toolcanvas.stroke();
-    }
-    for(var i=0;i<tilemap.tilecntY;i++){
-        toolcanvas.beginPath();
-        toolcanvas.moveTo(0,i*tooltilesizeY);
-        toolcanvas.lineTo(tilemap.tilecntY*tooltilesizeY,i*tooltilesizeY);
-        toolcanvas.stroke();
-    }
 }
 
 		</script>
