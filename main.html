@@ -97,6 +97,7 @@ class Tilemap {
         var dx=Math.floor((mx-rx+camera.scrollX)/this.tileSize);
         var dy=Math.floor((my-ry+camera.scrollY)/this.tileSize);
         this.m1={x:dx,y:dy};
+        this.m1.tileno=this.tilemap[(dy*this.maptilesX)+dx];
         redraw=true;        
     }
 
@@ -155,7 +156,11 @@ class Tilemap {
         // Thick yellow box surrounding selected tiles
         if(this.p1!=null){
             this.drawHighlight(this.p1,this.p2,3,"#ff8",this.toolZoom,this.toolwidth,this.toolheight,toolcanv);
-        }    
+        }
+        if(this.m1!=null){
+            var n={x:this.m1.tileno%this.tilecntX,y:Math.floor(this.m1.tileno/this.tilecntX)};
+            this.drawHighlight(n,n,3,"#f8f",this.toolZoom,this.toolwidth,this.toolheight,toolcanv);    
+        }
     }
 
     drawBox(x1,y1,x2,y2,linewidth,color,opacity,canv)
@@ -222,7 +227,7 @@ class Tilemap {
 
         // If mouse hover in main view
         if(this.m1!=null){
-            this.drawBox(this.m1.scx,this.m1.scy,this.m1.scx+this.tileSize,this.m1.scy+this.tileSize,3,"#ff8",0.4,canv);
+            this.drawBox(this.m1.scx+2,this.m1.scy+2,this.m1.scx+this.tileSize-2,this.m1.scy+this.tileSize-2,3,"#ff8",0.4,canv);
         } 
     }    
 }
