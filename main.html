@@ -67,6 +67,7 @@ class Tilemap {
           this.toolZoom=toolzoom;
           
           this.toolMoving=false;
+          this.hoverTile=null;
           
           // Components
           this.image=image;
@@ -104,10 +105,14 @@ class Tilemap {
     // Mouse Move in tool Window
     toolMove(mx,my,rx,ry)
     {
+        var tx=Math.floor((mx-rx)/(this.tileSize*this.toolZoom));
+        var ty=Math.floor((my-ry)/(this.tileSize*this.toolZoom));
         if(this.toolMoving){
-            this.p2={x:Math.floor((mx-rx)/(this.tileSize*this.toolZoom)),y:Math.floor((my-ry)/(this.tileSize*this.toolZoom))};        
-            redraw=true;        
+            this.p2={x:tx,y:ty};        
+        }else{
+            this.hoverTile=(ty*this.tilecntX)+tx;
         }
+        redraw=true;
     }
 
     // Mouse Down in Tool Window
@@ -161,6 +166,14 @@ class Tilemap {
             var n={x:this.m1.tileno%this.tilecntX,y:Math.floor(this.m1.tileno/this.tilecntX)};
             this.drawHighlight(n,n,3,"#f8f",this.toolZoom,this.toolwidth,this.toolheight,toolcanv);    
         }
+
+        // Info Panel Below TileMap
+        toolcanv.font = "26px arial narrow";
+        toolcanv.textBaseline = "top";
+        toolcanv.fillStyle="#fff";
+        toolcanv.clearRect(0,this.toolheight,64,30);
+        toolcanv.fillText(this.hoverTile, 0, this.toolheight);
+
     }
 
     drawBox(x1,y1,x2,y2,linewidth,color,opacity,canv)
@@ -215,6 +228,7 @@ class Tilemap {
         var offsY=camera.scrollY%this.tileSize;
         for(var i=0;i<(camera.screenTiles+1);i++){
             for(var j=0;j<(camera.screenTiles+1);j++){
+                // We know which tile so we compare with this.hoverTile
                 this.drawTile(this.tilemap[((scy+i)*this.maptilesX)+(scx+j)],(j*this.tileSize)-offsX,(i*this.tileSize)-offsY,canv);
                 if(this.m1!=null){
                     if(((scy+i)==this.m1.y)&&((scx+j)==this.m1.x)){
@@ -340,10 +354,13 @@ function zetup()
     toolcanvas = cc.getContext("2d");
 
     var tiles = new Image();
-    tiles.src = 'tilesets/test.png';
+    //tiles.src = 'tilesets/test.png';
+    tiles.src = 'tilesets/testV.png';
     //drawing of the test image - img1
     tiles.onload = function () {
-        mainmap = new Tilemap(51,20,19,66,84,tiles,tilemap,0.5);
+        //mainmap = new Tilemap(51,20,19,66,84,tiles,tilemap,0.5);
+        mainmap = new Tilemap(32,20,20,66,84,tiles,tilemap,1.0);
+        //mainmap = new Tilemap(16,20,20,66,84,tiles,tilemap,2.0);
         redraw=true;
         window.requestAnimationFrame(refresh);
     };

@@ -80,84 +80,134 @@ function refreshTools()
     }
 }
 
+var sourceY=0;
+
 function updatestate()
 {
     // World to the left and tiles to the right
-    c.drawImage(world,0,0);
-    toolcanvas.drawImage(tiles,0,0);
 
     var mapcntX=66;
-    var mapcntY=84
+    var mapcntY=84;
+
+    toolcanvas.drawImage(tiles,0,0);
+    c.drawImage(world,0,0);
 
     // Find map tiles in image
-    for(sourceY=0;sourceY<mapcntY;sourceY++){
-        for(sourceX=0;sourceX<mapcntX;sourceX++){
-            var tile=c.getImageData(sourceX*16, sourceY*16, 16, 16);
+    toolcanvas.clearRect(0,324,500,100);
+    toolcanvas.fillStyle="#d83";
+    toolcanvas.fillRect(0,324,500,40);
+    var pos=Math.round((sourceY/mapcntY)*492);
+    toolcanvas.fillStyle="#fff";
+    toolcanvas.fillRect(4,328,pos,32);
+    
+    for(sourceX=0;sourceX<mapcntX;sourceX++){
+        var tile=c.getImageData(sourceX*16, sourceY*16, 16, 16);
 
-            var diffMin=100000;
-            for(tileX=0;tileX<20;tileX++){    
-                for(tileY=0;tileY<20;tileY++){
-                    var diff=0;
-                    var tooltile=toolcanvas.getImageData((tileX*17)+1,(tileY*17)+1,16,16);
-                    for(var i=0;i<(tilesize*tilesize*4);i++){
-                        if((i%4)<2) diff+=Math.abs(tile.data[i]-tooltile.data[i]);
-                    }
-                    if(diff<diffMin){
-                        diffMin=diff;
-                        diffX=tileX;
-                        diffY=tileY;
-                    }
+        var diffMin=100000;
+        for(tileX=0;tileX<20;tileX++){    
+            for(tileY=0;tileY<20;tileY++){
+                var diff=0;
+                var tooltile=toolcanvas.getImageData((tileX*17)+1,(tileY*17)+1,16,16);
+                for(var i=0;i<(tilesize*tilesize*4);i++){
+                    if((i%4)<2) diff+=Math.abs(tile.data[i]-tooltile.data[i]);
+                }
+                if(diff<diffMin){
+                    diffMin=diff;
+                    diffX=tileX;
+                    diffY=tileY;
                 }
             }
+        }
 
-            // We found a minimum diff. If none is found we color that square black
-            if(diffMin!=0){
-                tilemap[(sourceY*mapcntX)+sourceX]=372;            
-            }else{
-                tilemap[(sourceY*mapcntX)+sourceX]=((diffY*20)+diffX);            
-            }
+        // We found a minimum diff. If none is found we color that square black
+        if(diffMin!=0){
+            tilemap[(sourceY*mapcntX)+sourceX]=0;            
+        }else{
+            var tileno=((diffY*20)+diffX);
+
+            // Substitutions
+            if(tileno>=240) tileno+=20;   // Move down one row
+
+            if(tileno==352) tileno=240;
+            if(tileno==353) tileno=241;
+
+            if(tileno==372) tileno=240;
+            if(tileno==373) tileno=241;            
+            if(tileno==374) tileno=242;
+            if(tileno==375) tileno=243;
+
+            if(tileno==368) tileno=269;            
+            if(tileno==369) tileno=270;
+
+            if(tileno==379) tileno=244;
+            if(tileno==162) tileno=245;
+
+            if(tileno==250) tileno=248;
+            if(tileno==348) tileno=249; 
+            if(tileno==349) tileno=250;              
+            if(tileno==146) tileno=251;
+            if(tileno==56)  tileno=252;
+            if(tileno==378) tileno=253;                                
+            if(tileno==336) tileno=254;
+            if(tileno==239) tileno=255;
+            if(tileno==356) tileno=256;
+            if(tileno==377) tileno=258;
+
+            if(tileno==359) tileno=231;            
+
+            if(tileno==26)  tileno=377;
+
+            if(tileno==101) tileno=378;
+            
+            if(tileno==319) tileno=162;
+            if(tileno==158) tileno=339;
+            
+            if(tileno==178) tileno=359;
+            if(tileno==259) tileno=376;
+            if(tileno==171) tileno=56;
+            if(tileno==156) tileno=171;
+            if(tileno==186) tileno=156;
+            if(tileno==160) tileno=158;
+
+            tilemap[(sourceY*mapcntX)+sourceX]=tileno;            
         }
     }
-    
+
+    sourceY++
+    if(sourceY<mapcntY){
+        window.requestAnimationFrame(updatestate);
+    }else{
+        Export();
+    }
+
+}
+
+function Export()
+{
     var str="[";
     for(var i=0;i<tilemap.length;i++){
         if((i%66)==0) str+="\n";
-        str+=","+tilemap[i];
+        if(i>0) str+=",";
+        str+=tilemap[i];
     }
     str+="]";
-    console.log(str);
 
+    var anchor = document.createElement("a");
+    var dataBlob = new Blob([str],{type:"text/javascript"});
+    var objUrl = URL.createObjectURL(dataBlob);
+    anchor.href = objUrl;
+    anchor.innerHTML ="With createObjectURL";
+    anchor.download = "data.js";
+    document.body.appendChild(anchor);
+    anchor.click();
 }
-
-function toolup(e)
-{
-
-}
-
-function tooldown(e)
-{
-
-}
-
-function toolmove(e)
-{
-/*
-  var rect = document.getElementById("toolCanvas").getBoundingClientRect();
-  var xk=(e.clientX-rect.left);
-  var yk=(e.clientY-rect.top);
-  toolcanvas.beginPath();
-  toolcanvas.moveTo(0,0);
-  toolcanvas.lineTo(xk,yk);
-  toolcanvas.stroke();
-*/
-}
-
 		</script>
 </head>
 <body onload="zetup();">
 
+<!--  <button onclick="Export();">Export</button>-->
   <div id="wrapper">
  	<canvas id="myCanvas" width="1056" height="1344" style="border:1px solid #000000;"></canvas> 
- 	<canvas id="toolCanvas" width="1024" height="1024" style="border:1px solid #000000;" onmousedown="tooldown(event);" onmouseup="toolup(event);" onmousemove="toolmove(event);"></canvas> 
+ 	<canvas id="toolCanvas" width="1024" height="1024" style="border:1px solid #000000;" ></canvas> 
   </div>
 </body>
