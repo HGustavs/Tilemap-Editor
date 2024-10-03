@@ -4,7 +4,13 @@
     <style>
         #wrapper{
             display:grid;
-            grid-template-areas: "main tools";
+            grid-template-areas: "main hud"
+                                 "main tools";
+
+        }
+
+        #HUDCanvas{
+            grid-area:hud;
         }
 
         #myCanvas{
@@ -56,7 +62,7 @@
 class Tilemap {
 
     // Tilecnt is in tile atlas and maptiles is in tile map array
-    constructor(tilesize,tilecntX,tilecntY,maptilesX,maptilesY,image,tilemap,toolzoom)
+    constructor(tilesize,tilecntX,tilecntY,maptilesX,maptilesY,image,tilemap,toolzoom,miniimage,minisize)
     {
           // Attributes
           this.tileSize = tilesize;
@@ -65,12 +71,14 @@ class Tilemap {
           this.maptilesX = maptilesX;
           this.maptilesY = maptilesY;
           this.toolZoom=toolzoom;
+          this.minisize=minisize;
           
           this.toolMoving=false;
           this.hoverTile=null;
           
           // Components
           this.image=image;
+          this.miniimage=miniimage;
           this.tilemap=tilemap;
           this.p1=null;
           this.p2=null;
@@ -133,6 +141,35 @@ class Tilemap {
         redraw=true;
     }
 
+    // Draw mini map overview
+    drawMiniView(minicanv,camera)
+    {
+        for(var xk=0;xk<this.maptilesX;xk++){
+            for(var yk=0;yk<this.maptilesY;yk++){
+                var maptile=this.tilemap[(yk*this.maptilesX)+xk];
+                var maptileY=Math.floor(maptile/this.tilecntX);
+                var maptileX=maptile%this.tilecntX;
+                minicanv.drawImage(this.miniimage,maptileX*this.minisize,maptileY*this.minisize,this.minisize,this.minisize,xk*this.minisize,(yk*this.minisize)+this.toolheight,this.minisize,this.minisize);
+            }
+        }
+
+        var scx=Math.floor((camera.scrollX/this.tileSize))*this.minisize;
+        var scy=Math.floor((camera.scrollY/this.tileSize))*this.minisize;
+        var sw=camera.screenTiles*this.minisize;
+        var sh=camera.screenTiles*this.minisize;
+        scy+=this.toolheight;
+
+        minicanv.beginPath();
+        minicanv.moveTo(scx,scy);
+        minicanv.lineTo(scx+sw,scy);
+        minicanv.lineTo(scx+sw,scy+sh);
+        minicanv.lineTo(scx,scy+sh);
+        minicanv.lineTo(scx,scy);
+        minicanv.stroke();
+        // Convert scroll position to mini view pixels
+        // Draw View as Rectangle on Screen
+    }
+
     // Refresh of tilemap to canvas
     drawToolView(toolcanv)
     {
@@ -167,12 +204,12 @@ class Tilemap {
             this.drawHighlight(n,n,3,"#f8f",this.toolZoom,this.toolwidth,this.toolheight,toolcanv);    
         }
 
-        // Info Panel Below TileMap
-        toolcanv.font = "26px arial narrow";
-        toolcanv.textBaseline = "top";
-        toolcanv.fillStyle="#fff";
-        toolcanv.clearRect(0,this.toolheight,64,30);
-        toolcanv.fillText(this.hoverTile, 0, this.toolheight);
+        // HUD Panel Rendering
+        hudcanvas.font = "26px arial narrow";
+        hudcanvas.textBaseline = "top";
+        hudcanvas.fillStyle="#fff";
+        hudcanvas.clearRect(0,0,64,30);
+        hudcanvas.fillText(this.hoverTile, 0, 0);
 
     }
 
@@ -277,6 +314,7 @@ var mainmap;
 var c;
 var redraw=true;
 var keyspressed=[];
+var hudcanvas=null;
 
 // --------------------=============######## Event Handlers ########=============--------------------
 
@@ -353,14 +391,20 @@ function zetup()
     var cc = document.getElementById("toolCanvas");
     toolcanvas = cc.getContext("2d");
 
+    var cc = document.getElementById("HUDCanvas");
+    hudcanvas = cc.getContext("2d");
+
     var tiles = new Image();
+    var minitiles = new Image();
+
+    minitiles.src = 'tilesets/minitiles.png';
     //tiles.src = 'tilesets/test.png';
     tiles.src = 'tilesets/testT.png';
     //drawing of the test image - img1
     tiles.onload = function () {
         //mainmap = new Tilemap(51,20,19,66,84,tiles,tilemap,0.5);
         //mainmap = new Tilemap(32,20,20,66,84,tiles,tilemap,1.0);
-        mainmap = new Tilemap(16,20,20,66,84,tiles,tilemap,2.0);
+        mainmap = new Tilemap(16,20,20,66,84,tiles,tilemap,2.0,minitiles,4);
         redraw=true;
         window.requestAnimationFrame(refresh);
     };
@@ -393,6 +437,7 @@ function refresh()
         if(mainmap!=null){
           mainmap.drawTilemap(c,camera);
           mainmap.drawToolView(toolcanvas);
+          mainmap.drawMiniView(toolcanvas,camera)
         }
         redraw=false;
     }
@@ -405,6 +450,7 @@ function refresh()
 
   <div id="infobar"></div>
   <div id="wrapper">
+ 	  <canvas id="HUDCanvas" width="816" height="32" style="border:1px solid #804;" ></canvas>     
  	  <canvas id="myCanvas" width="816" height="816" style="border:1px solid #000000;" onmousedown="maindown(event);" onmouseup="mainup(event);" onmousemove="mainmove(event);" ></canvas> 
  	  <canvas id="toolCanvas" width="1024" height="1024" style="border:1px solid #000000;" onmousedown="tooldown(event);" onmouseup="toolup(event);" onmousemove="toolmove(event);"></canvas> 
   </div>
