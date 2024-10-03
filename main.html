@@ -355,12 +355,12 @@ function zetup()
 
     var tiles = new Image();
     //tiles.src = 'tilesets/test.png';
-    tiles.src = 'tilesets/testV.png';
+    tiles.src = 'tilesets/testT.png';
     //drawing of the test image - img1
     tiles.onload = function () {
         //mainmap = new Tilemap(51,20,19,66,84,tiles,tilemap,0.5);
-        mainmap = new Tilemap(32,20,20,66,84,tiles,tilemap,1.0);
-        //mainmap = new Tilemap(16,20,20,66,84,tiles,tilemap,2.0);
+        //mainmap = new Tilemap(32,20,20,66,84,tiles,tilemap,1.0);
+        mainmap = new Tilemap(16,20,20,66,84,tiles,tilemap,2.0);
         redraw=true;
         window.requestAnimationFrame(refresh);
     };

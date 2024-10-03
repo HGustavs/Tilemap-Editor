@@ -21,6 +21,9 @@
 var c;
 var mx,my,mb=0;
 
+var mapcntX=66;
+var mapcntY=84;
+
 var tilesize=16;
 var tilecntX=20;
 var tilecntY=20;
@@ -29,6 +32,24 @@ var world = new Image();
 var screentiles=15;
 
 var tilemap=[];
+var piecemap=[];
+
+// Read map entry with bounds checking
+function getMap(xk,yk)
+{
+    if((xk<0)||(yk<0)||(xk>=mapcntX)||(yk>=mapcntY)) return -1;
+    return tilemap[(yk*mapcntX)+xk];
+}
+
+// If not in set, add tile to stack
+function pushTile(xk,yk,arr)
+{
+    var item=getMap(xk,yk);
+    if(item==-1) return;
+    if(!arr.includes(item)){
+        arr.push(item);
+    }
+}
 
 // Draw a single tile from tilemap
 function drawTile(tileno,dx,dy,tileimg)
@@ -85,9 +106,6 @@ var sourceY=0;
 function updatestate()
 {
     // World to the left and tiles to the right
-
-    var mapcntX=66;
-    var mapcntY=84;
 
     toolcanvas.drawImage(tiles,0,0);
     c.drawImage(world,0,0);
@@ -177,7 +195,32 @@ function updatestate()
     if(sourceY<mapcntY){
         window.requestAnimationFrame(updatestate);
     }else{
-        Export();
+        // Export();
+        // We process finished map for related data and push into piecemap
+        for(var i=0;i<(tilecntX*tilecntY);i++){
+            var piece={no:i,surrounding:[[],[],[],[],[],[],[],[]],cnt:0};
+            for(var xk=0;xk<mapcntX;xk++){
+                for(var yk=0;yk<mapcntY;yk++){
+                    // Current Map tile was found in map at position xk,yk. Search surrounding tiles
+                    if(getMap(xk,yk)==i){
+                        // Increase counter of map position
+                        piece.cnt++;
+                        pushTile(xk-1,yk-1,piece.surrounding[0]);
+                        pushTile(xk,yk-1,piece.surrounding[1]);
+                        pushTile(xk+1,yk-1,piece.surrounding[2]);
+                        
+                        pushTile(xk-1,yk,piece.surrounding[3]);
+                        pushTile(xk+1,yk,piece.surrounding[4]);
+
+                        pushTile(xk-1,yk+1,piece.surrounding[5]);
+                        pushTile(xk,yk+1,piece.surrounding[6]);
+                        pushTile(xk+1,yk+1,piece.surrounding[7]);
+                    }
+                }
+            }
+            piecemap.push(piece);        
+        }
+        console.log(piecemap);
     }
 
 }
