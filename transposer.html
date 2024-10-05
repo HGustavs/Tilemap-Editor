@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #wrapper{
+            width:1280px;
+            display:grid;
+            grid-template-areas: "main source"
+                                 "main result";
+        }
+
+        #destinationCanvas{
+            grid-area:main;
+        }
+
+        #resultCanvas{
+            grid-area:result;
+        }
+        
+        #sourceCanvas{
+            grid-area:source;
+        }        
+    </style>
+    <script>//document.write("<script type='text/javascript' src='helperFunction/hexcolors.js?t=" + Date.now() + "'><\/script>");</script>
+		<script>
+var source,destination,result;
+var mx,my,mb=0;
+var subs=[];
+
+// In transposition destination
+var mapcntX=20;
+var mapcntY=20;
+
+// In transposition source
+var tilesize=16;
+var resultsize=32;
+var tilecntX=12;
+var tilecntY=12;
+
+var sourceImage = new Image();
+var destinationImage = new Image();
+var resultImage = new Image();
+
+function zetup()
+{
+    var cc = document.getElementById("destinationCanvas");
+    destination = cc.getContext("2d");
+
+    var cc = document.getElementById("sourceCanvas");
+    source = cc.getContext("2d");
+
+    var cc = document.getElementById("resultCanvas");
+    result = cc.getContext("2d");
+
+    sourceImage.src = 'tilesets/transpsource.png';
+    sourceImage.onload = function () {
+    destinationImage.src = 'tilesets/transpdestination.png';
+        destinationImage.onload = function () {
+            resultImage.src = 'tilesets/transpresult.png';
+            resultImage.onload = function () {
+                source.drawImage(sourceImage,0,0);
+                destination.drawImage(destinationImage,0,0);
+                updatestate();
+            };
+        };        
+    };
+
+}
+
+var sourceY=0;
+
+// Called for each row
+// Final substitutions are added to subs array
+function updatestate()
+{
+/*
+    // Progress Bar
+    toolcanvas.clearRect(0,324,500,100);
+    toolcanvas.fillStyle="#d83";
+    toolcanvas.fillRect(0,324,500,40);
+    var pos=Math.round((sourceY/mapcntY)*492);
+    toolcanvas.fillStyle="#fff";
+    toolcanvas.fillRect(4,328,pos,32);
+*/
+
+    // Find map tiles in image one row at a time  
+    for(sourceX=0;sourceX<mapcntX;sourceX++){
+        var tile=destination.getImageData(sourceX*tilesize, sourceY*tilesize, tilesize, tilesize);
+
+        var diffMin=100000;
+        for(tileX=0;tileX<tilecntX;tileX++){    
+            for(tileY=0;tileY<tilecntY;tileY++){
+                var diff=0;
+                var tooltile=source.getImageData(tileX*tilesize,tileY*tilesize,tilesize,tilesize);
+                for(var i=0;i<(tilesize*tilesize*4);i++){
+                    if((i%4)<2) diff+=Math.abs(tile.data[i]-tooltile.data[i]);
+                }
+                if(diff<diffMin){
+                    diffMin=diff;
+                    diffX=tileX;
+                    diffY=tileY;
+                }
+            }
+        }
+
+        // We found a minimum diff. If none is found we color that square black
+        if(diffMin!=0){
+            //
+            // We now know the transposed position of this tile ... so we paint from our data image into result canvas and save the transposition position            
+        }else{
+            subs.push({destX:sourceX,destY:sourceY,sourceX:diffX,sourceY:diffY});
+        }
+    }
+
+    sourceY++
+    if(sourceY<mapcntY){
+        window.requestAnimationFrame(updatestate);
+    }else{
+        // Draw final substitutions
+        for(item of subs){
+            result.drawImage(resultImage, item.sourceX*resultsize, item.sourceY*resultsize, resultsize, resultsize, item.destX*resultsize, item.destY*resultsize, resultsize, resultsize)
+        }
+
+    }
+
+}
+
+function Export()
+{
+    var str="[";
+    for(var i=0;i<tilemap.length;i++){
+        if((i%66)==0) str+="\n";
+        if(i>0) str+=",";
+        str+=tilemap[i];
+    }
+    str+="]";
+
+    var anchor = document.createElement("a");
+    var dataBlob = new Blob([str],{type:"text/javascript"});
+    var objUrl = URL.createObjectURL(dataBlob);
+    anchor.href = objUrl;
+    anchor.innerHTML ="With createObjectURL";
+    anchor.download = "data.js";
+    document.body.appendChild(anchor);
+    anchor.click();
+}
+		</script>
+</head>
+<body onload="zetup();">
+
+<!--  <button onclick="Export();">Export</button>-->
+  <div id="wrapper">
+ 	<canvas id="destinationCanvas" width="320" height="320" style="border:1px solid #000000;"></canvas> 
+ 	<canvas id="sourceCanvas" width="320" height="320" style="border:1px solid #008;" ></canvas>  
+ 	<canvas id="resultCanvas" width="640" height="640" style="border:1px solid #800;" ></canvas> 
+  </div>
+</body>
