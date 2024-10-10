@@ -106,6 +106,8 @@ class Tilemap {
           this.p1=null;
           this.p2=null;
           this.m1=null;
+          this.b1=null;
+          this.b2=null;
 
           // Computed
           this.toolwidth=Math.floor(tilecntX*tilesize*toolzoom);
@@ -135,6 +137,23 @@ class Tilemap {
     }
 
     // Mouse Move in tool Window
+    brushMove(mx,my,rx,ry)
+    {
+        curx=Math.floor((mx-rx)/(this.tileSize*this.toolZoom));
+        cury=Math.floor((my-ry)/(this.tileSize*this.toolZoom));
+        if(curx<0) cury=0;
+        if(cury<0) cury=0;
+        if(curx>this.brushcntX-1) curx=this.brushcntX-1;
+        if(cury>this.brushcntY-1) cury=this.brushcntY-1;
+
+        if(this.toolMoving){
+            this.b2={x:curx,y:cury};        
+        }else{
+            this.hoverTile=(cury*this.tilecntX)+curx;
+        }
+        redraw=true;
+    }
+    // Mouse Move in tool Window
     toolMove(mx,my,rx,ry)
     {
         curx=Math.floor((mx-rx)/(this.tileSize*this.toolZoom));
@@ -161,10 +180,28 @@ class Tilemap {
         redraw=true;        
     }
 
+    // Mouse Down in Tool Window
+    brushDown(mx,my,rx,ry)
+    {
+        this.b1={x:curx,y:cury};
+        this.b2={x:curx,y:cury};        
+        this.toolMoving=true;
+        redraw=true;        
+    }
+
     // Mouse Up in Tool Window
     toolUp(mx,my,rx,ry)
     {
         this.p2={x:curx,y:cury};        
+
+        this.toolMoving=false;
+        redraw=true;
+    }
+
+    // Mouse Up in Tool Window
+    brushUp(mx,my,rx,ry)
+    {
+        this.b2={x:curx,y:cury};        
 
         this.toolMoving=false;
         redraw=true;
