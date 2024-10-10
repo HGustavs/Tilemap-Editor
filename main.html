@@ -143,8 +143,10 @@ class Tilemap {
         cury=Math.floor((my-ry)/(this.tileSize*this.toolZoom));
         if(curx<0) cury=0;
         if(cury<0) cury=0;
-        if(curx>this.brushcntX-1) curx=this.brushcntX-1;
-        if(cury>this.brushcntY-1) cury=this.brushcntY-1;
+        if(curx>(this.brushcntX-1)) curx=this.brushcntX-1;
+        if(cury>(this.brushcntY-1)) cury=this.brushcntY-1;
+
+        console.log(curx,cury);
 
         if(this.toolMoving){
             this.b2={x:curx,y:cury};        
@@ -153,6 +155,7 @@ class Tilemap {
         }
         redraw=true;
     }
+
     // Mouse Move in tool Window
     toolMove(mx,my,rx,ry)
     {
@@ -273,9 +276,13 @@ class Tilemap {
 
         // Thick yellow box surrounding selected tiles
         if(this.p1!=null){
-            // p1 is inside tile map we bounds check p2 to toolheight
-            // p1 is inside brush map we bounds check p2 to toolheight
+            // p1 is inside tile map we bounds check p2 to
             this.drawBox(this.p1.x*this.tileSize*this.toolZoom,this.p1.y*this.tileSize*this.toolZoom,this.p2.x*this.tileSize*this.toolZoom,this.p2.y*this.tileSize*this.toolZoom,3,"#ff8",0.4,this.tileSize*this.toolZoom,toolcanv);
+        }
+        if(this.b1!=null){
+            // b1 is inside brush map we bounds check p2 to toolheight
+            console.log(this.b1,this.b2);
+            this.drawBox(this.b1.x*this.tileSize*this.toolZoom,this.b1.y*this.tileSize*this.toolZoom,this.b2.x*this.tileSize*this.toolZoom,this.b2.y*this.tileSize*this.toolZoom,3,"#ff8",0.4,this.tileSize*this.toolZoom,brushcanv);
         }
         // Pink box surrounding hovered tile
         if(this.m1!=null){
@@ -458,19 +465,19 @@ function toolmove(e)
 
 function brushup(e)
 {
-    var rect = document.getElementById("toolCanvas").getBoundingClientRect();
+    var rect = document.getElementById("brushCanvas").getBoundingClientRect();
     mainmap.brushUp(e.clientX,e.clientY,rect.left,rect.top);
 }
 
 function brushdown(e)
 {
-  var rect = document.getElementById("toolCanvas").getBoundingClientRect();
+  var rect = document.getElementById("brushCanvas").getBoundingClientRect();
   mainmap.brushDown(e.clientX,e.clientY,rect.left,rect.top);
 }
 
 function brushmove(e)
 {
-  var rect = document.getElementById("toolCanvas").getBoundingClientRect();
+  var rect = document.getElementById("brushCanvas").getBoundingClientRect();
   mainmap.brushMove(e.clientX,e.clientY,rect.left,rect.top);
 }
 
