@@ -27,15 +27,23 @@ var source,destination,result;
 var mx,my,mb=0;
 var subs=[];
 
-// In transposition destination
-var mapcntX=20;
-var mapcntY=20;
+// In transposition destination/source behavior depends on setting
+const tilesettransp=false;
 
-// In transposition source
 var tilesize=16;
-var resultsize=32;
-var tilecntX=12;
-var tilecntY=12;
+if(tilesettransp){
+    var resultsize=16;
+    var mapcntX=20;
+    var mapcntY=20;
+    var tilecntX=20;
+    var tilecntY=19;
+}else{
+    var resultsize=32;
+    var mapcntX=20;
+    var mapcntY=20;
+    var tilecntX=12;
+    var tilecntY=12;
+}
 
 var sourceImage = new Image();
 var destinationImage = new Image();
@@ -52,11 +60,24 @@ function zetup()
     var cc = document.getElementById("resultCanvas");
     result = cc.getContext("2d");
 
-    sourceImage.src = 'tilesets/transpsource.png';
+    if(tilesettransp){
+        sourceImage.src = 'tilesets/transpsourceb.png';
+    }else{
+        sourceImage.src = 'tilesets/transpsource.png';    
+    }
+
     sourceImage.onload = function () {
-    destinationImage.src = 'tilesets/transpdestination.png';
+        if(tilesettransp){
+            destinationImage.src = 'tilesets/transpdestinationb.png';
+        }else{
+            destinationImage.src = 'tilesets/transpdestinationb.png';    
+        }    
         destinationImage.onload = function () {
-            resultImage.src = 'tilesets/transpresult.png';
+            if(tilesettransp){
+                resultImage.src = 'tilesets/transpsourcec.png';
+            }else{
+                resultImage.src = 'tilesets/transpresultc.png';
+            }    
             resultImage.onload = function () {
                 source.drawImage(sourceImage,0,0);
                 destination.drawImage(destinationImage,0,0);
@@ -108,7 +129,8 @@ function updatestate()
             //
             // We now know the transposed position of this tile ... so we paint from our data image into result canvas and save the transposition position            
         }else{
-            subs.push({destX:sourceX,destY:sourceY,sourceX:diffX,sourceY:diffY});
+            // diffX,diffY is from source, sourceX, sourceY is from destination image
+            subs.push({destX:sourceX,destY:sourceY,destTile:(sourceY*mapcntX)+sourceX,sourceX:diffX,sourceY:diffY,sourceTile:(diffY*tilecntX)+diffX});
         }
     }
 
@@ -116,25 +138,31 @@ function updatestate()
     if(sourceY<mapcntY){
         window.requestAnimationFrame(updatestate);
     }else{
-        // Draw final substitutions
-        for(item of subs){
-            result.drawImage(resultImage, item.sourceX*resultsize, item.sourceY*resultsize, resultsize, resultsize, item.destX*resultsize, item.destY*resultsize, resultsize, resultsize)
+        if(tilesettransp){
+            // If we do a tileset transposition we only need the transposition array in a nice format.
+            var str="var mapping=[";
+            var i=0;
+            for(item of subs){
+                if(item.destX!=item.sourceX||item.destY!=item.sourceY){
+                    if(i>0) str+=",";
+                    str+=`{d:${item.sourceTile},s:${item.destTile}}`;                    
+                    i++;
+                }                
+            }
+            str+="];\n";
+            Export(str);            
+        }else{
+            // Draw final substitutions
+            for(item of subs){
+                result.drawImage(resultImage, item.sourceX*resultsize, item.sourceY*resultsize, resultsize, resultsize, item.destX*resultsize, item.destY*resultsize, resultsize, resultsize)
+            }        
         }
-
     }
 
 }
 
-function Export()
+function Export(str)
 {
-    var str="[";
-    for(var i=0;i<tilemap.length;i++){
-        if((i%66)==0) str+="\n";
-        if(i>0) str+=",";
-        str+=tilemap[i];
-    }
-    str+="]";
-
     var anchor = document.createElement("a");
     var dataBlob = new Blob([str],{type:"text/javascript"});
     var objUrl = URL.createObjectURL(dataBlob);
