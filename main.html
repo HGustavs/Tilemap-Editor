@@ -111,7 +111,7 @@ class Tilemap {
           this.tilecntY = tilecntY;
           this.maptilesX = maptilesX;   // Count of tiles in level map
           this.maptilesY = maptilesY;
-          this.brushcntX = brushcntX;
+          this.brushcntX = brushcntX;   // Count of tiles in brush map
           this.brushcntY = brushcntY;
 
           this.toolZoom=toolzoom;
@@ -128,6 +128,10 @@ class Tilemap {
           this.p1=null;
           this.p2=null;
           this.m1=null;
+          this.brushData=[];
+          for(var i=0;i<(this.brushcntX*this.brushcntY);i++){
+              this.brushData[i]=-1;
+          }
 
           // Computed
           this.toolwidth=Math.floor(tilecntX*tilesize*toolzoom);
@@ -197,8 +201,32 @@ class Tilemap {
     // Mouse Up in Tool Window
     mapUp(mx,my,rx,ry,kind)
     {
+        // We did not move in tool window i.e. select single tile
+        if((kind==TOOL)&&(this.toolMoving==-1)){
+            this.p1={x:curx,y:cury};
+            this.p2={x:curx,y:cury};
+            this.toolMarked=TOOL;
+        }
+
+        // If mouse is making selection box
         if(this.toolMoving>0){
             this.toolMarked=kind;
+        }
+
+        // If we just do a click in brush view
+        if((kind==BRUSH)&&(this.toolMoving==-1)){
+            // First we do bounds checkng i.e. if we are inside selection area we do nothing
+            if(this.toolMarked==BRUSH){
+                if((curx>Math.max(this.p1.x,this.p2.x))||(cury>Math.max(this.p1.y,this.p2.y))||(curx<Math.min(this.p1.x,this.p2.x))||(cury<Math.min(this.p1.y,this.p2.y))){
+                    for(var oy=Math.min(this.p1.y,this.p2.y);oy<=Math.max(this.p1.y,this.p2.y);oy++){
+                        for(var ox=Math.min(this.p1.x,this.p2.x);ox<=Math.max(this.p1.x,this.p2.x);ox++){
+                            console.log(ox,oy);
+                        }                    
+                    }
+                }
+            }else if(this.toolMarked==TOOL){
+                alert("Draw Tool");
+            }
         }
         this.toolMoving=false;
         redraw=true;
