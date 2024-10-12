@@ -49,10 +49,10 @@
 //        (. .)づ                      (-ㅅ-)
 //       c(")(")    ∴                 c(”)(”)
 //--------------------------------------------------------------------------------------------------------
-// Features                            Finished Features 
+// Features                                Finished Features 
 //--------------------------------------------------------------------------------------------------------
-// Tile Drawing in Map                 Minimap
-// Bidirectional Highlight             Scrolling View
+// Tile Drawing in Map                     Minimap
+// Bidirectional Highlight                 Scrolling View
 // Brush Library                       
 // Game Character                      
 // Colisions
@@ -64,6 +64,9 @@
 // Flood Fill Selection / Brush
 // Minimap highlight
 // Selection Array Overlay
+// Click to draw Double selects tile
+// Click+Move draws selection fence
+// Move between windows state
 
 // --------------------=============######## References ########=============--------------------
 
@@ -96,7 +99,7 @@ class Tilemap {
           this.toolZoom=toolzoom;
           this.minisize=minisize;
           
-          this.toolMoving=false;
+          this.toolMoving=null;
           this.hoverTile=null;
           
           // Components
@@ -137,7 +140,7 @@ class Tilemap {
     }
 
     // Mouse Move in tool Window
-    brushMove(mx,my,rx,ry)
+    brushMove(mx,my,rx,ry,dx,dy)
     {
         curx=Math.floor((mx-rx)/(this.tileSize*this.toolZoom));
         cury=Math.floor((my-ry)/(this.tileSize*this.toolZoom));
@@ -145,8 +148,6 @@ class Tilemap {
         if(cury<0) cury=0;
         if(curx>(this.brushcntX-1)) curx=this.brushcntX-1;
         if(cury>(this.brushcntY-1)) cury=this.brushcntY-1;
-
-        console.log(curx,cury);
 
         if(this.toolMoving){
             this.b2={x:curx,y:cury};        
@@ -157,7 +158,7 @@ class Tilemap {
     }
 
     // Mouse Move in tool Window
-    toolMove(mx,my,rx,ry)
+    toolMove(mx,my,rx,ry,dx,dy)
     {
         curx=Math.floor((mx-rx)/(this.tileSize*this.toolZoom));
         cury=Math.floor((my-ry)/(this.tileSize*this.toolZoom));
@@ -202,7 +203,7 @@ class Tilemap {
     }
 
     // Mouse Up in Tool Window
-    brushUp(mx,my,rx,ry)
+    brushUp(mx,my,rx,ry,dx,dy)
     {
         this.b2={x:curx,y:cury};        
 
@@ -281,7 +282,6 @@ class Tilemap {
         }
         if(this.b1!=null){
             // b1 is inside brush map we bounds check p2 to toolheight
-            console.log(this.b1,this.b2);
             this.drawBox(this.b1.x*this.tileSize*this.toolZoom,this.b1.y*this.tileSize*this.toolZoom,this.b2.x*this.tileSize*this.toolZoom,this.b2.y*this.tileSize*this.toolZoom,3,"#ff8",0.4,this.tileSize*this.toolZoom,brushcanv);
         }
         // Pink box surrounding hovered tile
@@ -384,7 +384,9 @@ class Camera2D {
 }
 
 // --------------------=============######## Globals ########=============--------------------
-var curx,cury;
+var curx,cury;                  // Current tile x and y
+var smx,smy;                    // Start mouse x and y
+var cmx,cmy;
 var camera=new Camera2D(20);
 var mainmap;
 var redraw=true;
@@ -427,58 +429,31 @@ function keyUpOwn(event)
     }
 }
 
-function mainup(e)
+function mouseUp(e)
 {
-
+    var rect = document.getElementById(e.target.id).getBoundingClientRect();
+    if(e.target.id=="toolCanvas") mainmap.toolUp(e.clientX,e.clientY,rect.left,rect.top);
+    if(e.target.id=="brushCanvas") mainmap.brushUp(e.clientX,e.clientY,rect.left,rect.top);    
 }
 
-function maindown(e)
+function mouseMove(e)
 {
-  var rect = document.getElementById("myCanvas").getBoundingClientRect();
-  mainmap.updateTile(133,e.clientX-rect.left,e.clientY-rect.top,camera);    
+    var rect = document.getElementById(e.target.id).getBoundingClientRect();
+    if(e.target.id=="myCanvas") mainmap.mainMove(e.clientX,e.clientY,rect.left,rect.top);
+    if(e.target.id=="toolCanvas") mainmap.toolMove(e.clientX,e.clientY,rect.left,rect.top);
+    if(e.target.id=="brushCanvas") mainmap.brushMove(e.clientX,e.clientY,rect.left,rect.top,(e.clientX-rect.left)-smx,(e.clientY-rect.top)-smy);
 }
 
-function mainmove(e)
+function mouseDown(e)
 {
-  var rect = document.getElementById("myCanvas").getBoundingClientRect();
-  mainmap.mainMove(e.clientX,e.clientY,rect.left,rect.top);
-}
-
-function toolup(e)
-{
-    var rect = document.getElementById("toolCanvas").getBoundingClientRect();
-    mainmap.toolUp(e.clientX,e.clientY,rect.left,rect.top);
-}
-
-function tooldown(e)
-{
-  var rect = document.getElementById("toolCanvas").getBoundingClientRect();
-  mainmap.toolDown(e.clientX,e.clientY,rect.left,rect.top);
-
-}
-
-function toolmove(e)
-{
-  var rect = document.getElementById("toolCanvas").getBoundingClientRect();
-  mainmap.toolMove(e.clientX,e.clientY,rect.left,rect.top);
-}
-
-function brushup(e)
-{
-    var rect = document.getElementById("brushCanvas").getBoundingClientRect();
-    mainmap.brushUp(e.clientX,e.clientY,rect.left,rect.top);
-}
-
-function brushdown(e)
-{
-  var rect = document.getElementById("brushCanvas").getBoundingClientRect();
-  mainmap.brushDown(e.clientX,e.clientY,rect.left,rect.top);
-}
-
-function brushmove(e)
-{
-  var rect = document.getElementById("brushCanvas").getBoundingClientRect();
-  mainmap.brushMove(e.clientX,e.clientY,rect.left,rect.top);
+    var rect = document.getElementById(e.target.id).getBoundingClientRect();
+    if(e.target.id=="myCanvas") mainmap.updateTile(133,e.clientX-rect.left,e.clientY-rect.top,camera);
+    if(e.target.id=="toolCanvas") mainmap.toolDown(e.clientX,e.clientY,rect.left,rect.top);
+    if(e.target.id=="brushCanvas"){
+        smx=e.clientX-rect.left;
+        smy=e.clientY-rect.top; 
+        mainmap.brushDown(e.clientX,e.clientY,rect.left,rect.top);
+    }
 }
 
 function zetup()
@@ -502,7 +477,7 @@ function zetup()
     //tiles.src = 'tilesets/test.png';
     //tiles.src = 'tilesets/testT.png';
     //drawing of the test image - img1
-    tiles.src = 'tilesets/testResultc.png';
+    tiles.src = 'tilesets/testResultd.png';
     tiles.onload = function () {
         //mainmap = new Tilemap(51,20,19,66,84,tiles,tilemap,0.5);
         //mainmap = new Tilemap(32,20,20,66,84,tiles,tilemap,1.0);
@@ -554,8 +529,8 @@ function refresh()
   <div id="infobar"></div>
   <div id="wrapper">
  	  <canvas id="HUDCanvas" width="816" height="32" style="border:1px solid #804;" ></canvas>     
- 	  <canvas id="myCanvas" width="640" height="640" style="border:1px solid #000000;" onmousedown="maindown(event);" onmouseup="mainup(event);" onmousemove="mainmove(event);" ></canvas> 
- 	  <canvas id="toolCanvas" width="600" height="360" style="border:1px solid #888;" onmousedown="tooldown(event);" onmouseup="toolup(event);" onmousemove="toolmove(event);"></canvas> 
-    <canvas id="brushCanvas" width="600" height="360" style="border:1px solid #fff;" onmousedown="brushdown(event);" onmouseup="brushup(event);" onmousemove="brushmove(event);"></canvas>
+ 	  <canvas id="myCanvas" width="640" height="640" style="border:1px solid #000000;" onmousedown="mouseDown(event);" onmouseup="mouseUp(event);" onmousemove="mouseMove(event);" ></canvas> 
+ 	  <canvas id="toolCanvas" width="600" height="360" style="border:1px solid #888;" onmousedown="mouseDown(event);" onmouseup="mouseUp(event);" onmousemove="mouseMove(event);"></canvas> 
+    <canvas id="brushCanvas" width="600" height="360" style="border:1px solid #fff;" onmousedown="mouseDown(event);" onmouseup="mouseUp(event);" onmousemove="mouseMove(event);"></canvas>
   </div>
 </body>

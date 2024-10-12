@@ -41,8 +41,8 @@ if(tilesettransp){
     var resultsize=32;
     var mapcntX=20;
     var mapcntY=20;
-    var tilecntX=12;
-    var tilecntY=12;
+    var tilecntX=7;
+    var tilecntY=7;
 }
 
 var sourceImage = new Image();
@@ -63,20 +63,20 @@ function zetup()
     if(tilesettransp){
         sourceImage.src = 'tilesets/transpsourceb.png';
     }else{
-        sourceImage.src = 'tilesets/transpsource.png';    
+        sourceImage.src = 'tilesets/transpsource_imgground 112x112f.png';    
     }
 
     sourceImage.onload = function () {
         if(tilesettransp){
             destinationImage.src = 'tilesets/transpdestinationb.png';
         }else{
-            destinationImage.src = 'tilesets/transpdestinationb.png';    
+            destinationImage.src = 'tilesets/transpdestination.png';    
         }    
         destinationImage.onload = function () {
             if(tilesettransp){
                 resultImage.src = 'tilesets/transpsourcec.png';
             }else{
-                resultImage.src = 'tilesets/transpresultc.png';
+                resultImage.src = 'tilesets/transpsource_imgground 224x224.png';
             }    
             resultImage.onload = function () {
                 source.drawImage(sourceImage,0,0);
