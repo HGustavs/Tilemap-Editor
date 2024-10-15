@@ -53,7 +53,7 @@
 //--------------------------------------------------------------------------------------------------------
 // Tile Drawing in Map                     Minimap
 // Bidirectional Highlight                 Scrolling View
-// Brush Library                       
+// Brush Library                           Click+Move draws selection fence
 // Game Character                      
 // Colisions
 // Weapons
@@ -64,8 +64,6 @@
 // Flood Fill Selection / Brush
 // Minimap highlight
 // Selection Array Overlay
-// Click to draw Double selects tile
-// Click+Move draws selection fence
 // Move between windows state
 
 // --------------------=============######## References ########=============--------------------
@@ -93,6 +91,7 @@ var c=null;
 
 const TOOL=1;
 const BRUSH=2;
+const MAIN=3;
 
 // --------------------=============######## Classes ########=============--------------------
 
@@ -116,6 +115,8 @@ class Tilemap {
 
           this.toolZoom=toolzoom;
           this.minisize=minisize;
+          this.tooltilesizeX=this.tileSize*this.toolZoom;
+          this.tooltilesizeY=this.tileSize*this.toolZoom;          
           
           this.toolMoving=false;
           this.toolMarked=false;
@@ -138,33 +139,25 @@ class Tilemap {
           this.toolheight=Math.floor(tilecntY*tilesize*toolzoom);
     }
 
-    // Mouse Click in Tilemap - Pixel in Tilemap
-    updateTile(tileno,dx,dy,camera)
+    // Mouse move in brush or tool view
+    mapMove(mx,my,rx,ry,dx,dy,kind)
     {
-        dx=Math.floor((dx+camera.scrollX)/this.tileSize);
-        dy=Math.floor((dy+camera.scrollY)/this.tileSize);
-        
-        this.tilemap[(dy*this.maptilesX)+dx]=tileno;
-
-        redraw=true;
-    }
-
-    // Mouse Move in main Window
-    mainMove(mx,my,rx,ry)
-    {
+/*
         var dx=Math.floor((mx-rx+camera.scrollX)/this.tileSize);
         var dy=Math.floor((my-ry+camera.scrollY)/this.tileSize);
         this.m1={x:dx,y:dy};
         this.m1.tileno=this.tilemap[(dy*this.maptilesX)+dx];
         this.hoverTile=this.m1.tileno;
-        redraw=true;        
-    }
-
-    // Mouse move in brush or tool view
-    mapMove(mx,my,rx,ry,dx,dy,kind)
-    {
-        curx=Math.floor((mx-rx)/(this.tileSize*this.toolZoom));
-        cury=Math.floor((my-ry)/(this.tileSize*this.toolZoom));
+        redraw=true;
+*/
+        // Read tile number
+        if(kind==BRUSH||kind==TOOL){
+            curx=Math.floor((mx-rx)/(this.tileSize*this.toolZoom));
+            cury=Math.floor((my-ry)/(this.tileSize*this.toolZoom));        
+        }else if(kind==MAIN){
+            curx=Math.floor((mx-rx)/this.tileSize);
+            cury=Math.floor((mx-rx)/this.tileSize);        
+        }
         if(curx<0) cury=0;
         if(cury<0) cury=0;
 
@@ -175,6 +168,9 @@ class Tilemap {
             if(curx>this.tilecntX-1) curx=this.tilecntX-1;
             if(cury>this.tilecntY-1) cury=this.tilecntY-1;
             this.hoverTile=(cury*this.tilecntX)+curx;        
+        }else if(kind==MAIN){
+            if(curx>this.mapcntX) curx=this.mapcntX;
+            if(cury>this.mapcntY) cury=this.mapcntY;
         }
 
         // if toolMoving != false
@@ -184,9 +180,7 @@ class Tilemap {
             this.p1={x:curx,y:cury};
         }
 
-        if(this.toolMoving==BRUSH){
-            this.p2={x:curx,y:cury};
-        }else if(this.toolMoving==TOOL){
+        if(this.toolMoving==BRUSH||this.toolMoving==TOOL||this.toolMoving==MAIN){
             this.p2={x:curx,y:cury};
         }
         redraw=true;
@@ -201,6 +195,8 @@ class Tilemap {
     // Mouse Up in Tool Window
     mapUp(mx,my,rx,ry,kind)
     {
+        console.log(kind,this.p1,this.p2);
+
         // We did not move in tool window i.e. select single tile
         if((kind==TOOL)&&(this.toolMoving==-1)){
             this.p1={x:curx,y:cury};
@@ -215,17 +211,25 @@ class Tilemap {
 
         // If we just do a click in brush view
         if((kind==BRUSH)&&(this.toolMoving==-1)){
-            // First we do bounds checkng i.e. if we are inside selection area we do nothing
-            if(this.toolMarked==BRUSH){
-                if((curx>Math.max(this.p1.x,this.p2.x))||(cury>Math.max(this.p1.y,this.p2.y))||(curx<Math.min(this.p1.x,this.p2.x))||(cury<Math.min(this.p1.y,this.p2.y))){
-                    for(var oy=Math.min(this.p1.y,this.p2.y);oy<=Math.max(this.p1.y,this.p2.y);oy++){
-                        for(var ox=Math.min(this.p1.x,this.p2.x);ox<=Math.max(this.p1.x,this.p2.x);ox++){
-                            console.log(ox,oy);
-                        }                    
+            // Iterate over source area for each square
+            var adjy=Math.min(this.p1.y,this.p2.y);
+            var adjx=Math.min(this.p1.x,this.p2.x);
+            for(var oy=adjy;oy<=Math.max(this.p1.y,this.p2.y);oy++){
+                for(var ox=adjx;ox<=Math.max(this.p1.x,this.p2.x);ox++){
+                    var destx=ox+curx-adjx;
+                    var desty=oy+cury-adjy     ;
+                    if(this.toolMarked==BRUSH){
+                        if((destx<this.brushcntX)&&(desty<this.brushcntY)){
+                            if((destx>Math.max(this.p1.x,this.p2.x))||(desty>Math.max(this.p1.y,this.p2.y))||(destx<Math.min(this.p1.x,this.p2.x))||(desty<Math.min(this.p1.y,this.p2.y))){
+                                this.brushData[(desty*this.brushcntX)+destx]=this.brushData[(oy*this.brushcntX)+ox];
+                            }
+                        }
+                    }else if(this.toolMarked==TOOL){
+                        if((destx<this.brushcntX)&&(desty<this.brushcntY)){
+                            this.brushData[(desty*this.brushcntX)+destx]=(oy*this.tilecntX)+ox;  
+                        }                            
                     }
                 }
-            }else if(this.toolMarked==TOOL){
-                alert("Draw Tool");
             }
         }
         this.toolMoving=false;
@@ -256,68 +260,92 @@ class Tilemap {
 
     }
 
-    // Refresh of tilemap to canvas
-    drawToolView(toolcanv,brushcanv)
+    //------------------------------------------------------------------------------------------
+    // drawHUD - Refresh HUD view on given canvas
+    //-------------------------------------------------------------------------------------------
+    drawHUDView(hudcanv)
+    {
+        // HUD Panel Rendering
+        hudcanv.font = "26px arial narrow";
+        hudcanv.textBaseline = "top";
+        hudcanv.fillStyle="#fff";
+        hudcanv.clearRect(0,0,64,30);
+        hudcanv.fillText(this.hoverTile, 0, 0);
+    }
+
+    //------------------------------------------------------------------------------------------
+    // drawToolView - Refresh tool view on given canvas
+    //-------------------------------------------------------------------------------------------
+
+    drawToolView(toolcanv)
     {
         toolcanv.drawImage(this.image,0,0,this.toolwidth,this.toolheight);
 
-        var tooltilesizeX=this.tileSize*this.toolZoom;
-        var tooltilesizeY=this.tileSize*this.toolZoom;
-        var tilecnt=Math.max(this.tilecntX,Math.max(this.tilecntY,Math.max(this.brushcntX+1,this.brushcntY+1)));
-
-        brushcanv.clearRect(0,0,tooltilesizeX*this.brushcntX,tooltilesizeY*this.brushcntY);
-
         // Grid Lines
-        toolcanv.globalAlpha=0.4;
-        brushcanv.globalAlpha=0.4;
-        toolcanv.strokeStyle="#8f8";
-        brushcanv.strokeStyle="#8f8";
-        toolcanv.beginPath();
-        brushcanv.beginPath();
-        for(var i=0;i<tilecnt;i++){
-            if(i<this.tilecntY){
-                toolcanv.moveTo(0,i*tooltilesizeY);
-                toolcanv.lineTo(this.tilecntX*tooltilesizeX,i*tooltilesizeY);               
-            }
-            if(i<this.tilecntX){
-                toolcanv.moveTo(i*tooltilesizeX,0);
-                toolcanv.lineTo(i*tooltilesizeX,this.tilecntY*tooltilesizeY);
-            }
-            if(i<=(this.brushcntY)){
-                brushcanv.moveTo(0,(i*tooltilesizeY));
-                brushcanv.lineTo(this.brushcntX*tooltilesizeX,(i*tooltilesizeY));               
-            }
-            if(i<=this.brushcntX){
-                brushcanv.moveTo(i*tooltilesizeX,0);
-                brushcanv.lineTo(i*tooltilesizeX,(this.brushcntY*tooltilesizeY));
-            }
-        }
-        brushcanv.stroke();
-        toolcanv.stroke();
-        toolcanv.globalAlpha=1.0;
-        brushcanv.globalAlpha=1.0;
+        this.drawGrid(this.tilecntX*this.tooltilesizeX,this.tilecntY*this.tooltilesizeY,this.tooltilesizeX,this.tooltilesizeY,"#8f8",0.4,toolcanv);
 
         // Thick yellow box surrounding selected tiles
-        if(this.toolMoving==BRUSH||this.toolMarked==BRUSH){
-            this.drawBox(this.p1.x*this.tileSize*this.toolZoom,this.p1.y*this.tileSize*this.toolZoom,this.p2.x*this.tileSize*this.toolZoom,this.p2.y*this.tileSize*this.toolZoom,3,"#ff8",0.4,this.tileSize*this.toolZoom,brushcanv);
-        }else if(this.toolMoving==TOOL||this.toolMarked==TOOL){
+        if(this.toolMoving==TOOL||this.toolMarked==TOOL){
             this.drawBox(this.p1.x*this.tileSize*this.toolZoom,this.p1.y*this.tileSize*this.toolZoom,this.p2.x*this.tileSize*this.toolZoom,this.p2.y*this.tileSize*this.toolZoom,3,"#ff8",0.4,this.tileSize*this.toolZoom,toolcanv);
         }
 
         // Pink box surrounding hovered tile
         if(this.m1!=null){
-//            var n={x:this.m1.tileno%this.tilecntX,y:Math.floor(this.m1.tileno/this.tilecntX)};
-//            alert("highlight m1");
-//            this.drawHighlight(n,n,3,"#f8f",this.toolZoom,this.toolwidth,this.toolheight,toolcanv);    
+            var x1=(this.m1.tileno%this.tilecntX)*this.tileSize*this.toolZoom;
+            var y1=Math.floor(this.m1.tileno/this.tilecntX)*this.tileSize*this.toolZoom;
+            var x2=x1+(this.tileSize*this.toolZoom);
+            var y2=y1+(this.tileSize*this.toolZoom);
+            this.drawBox(x1,y1,x2,y2,3,"#f8f",0.4,0,toolcanv);
         }
 
-        // HUD Panel Rendering
-        hudcanvas.font = "26px arial narrow";
-        hudcanvas.textBaseline = "top";
-        hudcanvas.fillStyle="#fff";
-        hudcanvas.clearRect(0,0,64,30);
-        hudcanvas.fillText(this.hoverTile, 0, 0);
+    }
 
+    //------------------------------------------------------------------------------------------
+    // drawBrishView - Refresh brush view on given canvas
+    //-------------------------------------------------------------------------------------------
+    
+    drawBrushView(brushcanv)
+    {
+        // We clear brush area
+        brushcanv.clearRect(0,0,this.tooltilesizeX*this.brushcntX,this.tooltilesizeY*this.brushcntY);
+
+        // Update image in brush area
+        for(var xk=0;xk<this.brushcntX;xk++){
+            for(var yk=0;yk<this.brushcntY;yk++){
+                var maptile=this.brushData[(yk*this.brushcntX)+xk];
+                var maptileY=Math.floor(maptile/this.tilecntX);
+                var maptileX=maptile%this.tilecntX;
+                brushcanv.drawImage(this.image,maptileX*this.tileSize,maptileY*this.tileSize,this.tileSize,this.tileSize,(xk*this.tooltilesizeX),(yk*this.tooltilesizeY),this.tooltilesizeX,this.tooltilesizeY);
+            }
+        }
+
+        // Thick yellow box surrounding selected tiles
+        if(this.toolMoving==BRUSH||this.toolMarked==BRUSH){
+            this.drawBox(this.p1.x*this.tileSize*this.toolZoom,this.p1.y*this.tileSize*this.toolZoom,this.p2.x*this.tileSize*this.toolZoom,this.p2.y*this.tileSize*this.toolZoom,3,"#ff8",0.4,this.tileSize*this.toolZoom,brushcanv);
+        }
+
+        // Draw grid lines over image
+        this.drawGrid(this.brushcntX*this.tooltilesizeX,this.brushcntY*this.tooltilesizeY,this.tooltilesizeX,this.tooltilesizeY,"#8f8",0.4,brushcanv);
+    }
+
+    // --------------------=============######## Generic Drawing Functions ########=============--------------------    
+
+    // Draw gridlines in a specified canvas
+    drawGrid(width,height,tilesizeX,tilesizeY,color,opacity,canv)
+    {
+        canv.globalAlpha=opacity;
+        canv.strokeStyle=color;
+        canv.beginPath();
+        for(var i=0;i<=width;i+=tilesizeX){
+            canv.moveTo(i,0);
+            canv.lineTo(i,height);
+        }
+        for(var i=0;i<=height;i+=tilesizeY){
+            canv.moveTo(0,i);
+            canv.lineTo(width,i);        
+        }
+        canv.stroke();
+        canv.globalAlpha=1.0;
     }
 
     // drawBox draws a line rectangle when given two unordered points
@@ -441,12 +469,13 @@ function mouseUp(e)
     var rect = document.getElementById(e.target.id).getBoundingClientRect();
     if(e.target.id=="toolCanvas") mainmap.mapUp(e.clientX,e.clientY,rect.left,rect.top,TOOL);
     if(e.target.id=="brushCanvas") mainmap.mapUp(e.clientX,e.clientY,rect.left,rect.top,BRUSH);    
+    if(e.target.id=="myCanvas") mainmap.mapUp(e.clientX,e.clientY,rect.left,rect.top,MAIN);
 }
 
 function mouseMove(e)
 {
     var rect = document.getElementById(e.target.id).getBoundingClientRect();
-    if(e.target.id=="myCanvas") mainmap.mainMove(e.clientX,e.clientY,rect.left,rect.top);
+    if(e.target.id=="myCanvas") mainmap.mapMove(e.clientX,e.clientY,rect.left,rect.top,(e.clientX-rect.left)-smx,(e.clientY-rect.top)-smy,MAIN);
     if(e.target.id=="toolCanvas") mainmap.mapMove(e.clientX,e.clientY,rect.left,rect.top,(e.clientX-rect.left)-smx,(e.clientY-rect.top)-smy,TOOL);
     if(e.target.id=="brushCanvas") mainmap.mapMove(e.clientX,e.clientY,rect.left,rect.top,(e.clientX-rect.left)-smx,(e.clientY-rect.top)-smy,BRUSH);
 }
@@ -457,7 +486,7 @@ function mouseDown(e)
     smx=e.clientX-rect.left;
     smy=e.clientY-rect.top; 
 
-    if(e.target.id=="myCanvas") mainmap.updateTile(133,e.clientX-rect.left,e.clientY-rect.top,camera);
+    if(e.target.id=="myCanvas") mainmap.mapDown(e.clientX,e.clientY,rect.left,rect.top,MAIN);
     if(e.target.id=="toolCanvas") mainmap.mapDown(e.clientX,e.clientY,rect.left,rect.top,TOOL);
     if(e.target.id=="brushCanvas") mainmap.mapDown(e.clientX,e.clientY,rect.left,rect.top,BRUSH);
 }
@@ -520,7 +549,9 @@ function refresh()
     if(redraw){
         if(mainmap!=null){
           mainmap.drawTilemap(c,camera);
-          mainmap.drawToolView(toolcanvas,brushcanvas);
+          mainmap.drawToolView(toolcanvas);
+          mainmap.drawBrushView(brushcanvas);
+          mainmap.drawHUDView(hudcanvas);
           mainmap.drawMiniView(toolcanvas,camera)
         }
         redraw=false;
