@@ -140,23 +140,15 @@ class Tilemap {
     }
 
     // Mouse move in brush or tool view
-    mapMove(mx,my,rx,ry,dx,dy,kind)
+    mapMove(mx,my,rx,ry,dx,dy,camera,kind)
     {
-/*
-        var dx=Math.floor((mx-rx+camera.scrollX)/this.tileSize);
-        var dy=Math.floor((my-ry+camera.scrollY)/this.tileSize);
-        this.m1={x:dx,y:dy};
-        this.m1.tileno=this.tilemap[(dy*this.maptilesX)+dx];
-        this.hoverTile=this.m1.tileno;
-        redraw=true;
-*/
         // Read tile number
         if(kind==BRUSH||kind==TOOL){
             curx=Math.floor((mx-rx)/(this.tileSize*this.toolZoom));
             cury=Math.floor((my-ry)/(this.tileSize*this.toolZoom));        
         }else if(kind==MAIN){
-            curx=Math.floor((mx-rx)/this.tileSize);
-            cury=Math.floor((mx-rx)/this.tileSize);        
+            curx=Math.floor((mx-rx+camera.scrollX)/this.tileSize);
+            cury=Math.floor((my-ry+camera.scrollY)/this.tileSize);        
         }
         if(curx<0) cury=0;
         if(cury<0) cury=0;
@@ -171,6 +163,13 @@ class Tilemap {
         }else if(kind==MAIN){
             if(curx>this.mapcntX) curx=this.mapcntX;
             if(cury>this.mapcntY) cury=this.mapcntY;
+        }
+
+        if(this.toolMoving==false&&kind==MAIN){
+            this.m1={x:curx,y:cury};
+            this.m1.tileno=this.tilemap[(cury*this.maptilesX)+curx];
+            this.hoverTile=this.m1.tileno;
+            redraw=true;        
         }
 
         // if toolMoving != false
@@ -475,9 +474,9 @@ function mouseUp(e)
 function mouseMove(e)
 {
     var rect = document.getElementById(e.target.id).getBoundingClientRect();
-    if(e.target.id=="myCanvas") mainmap.mapMove(e.clientX,e.clientY,rect.left,rect.top,(e.clientX-rect.left)-smx,(e.clientY-rect.top)-smy,MAIN);
-    if(e.target.id=="toolCanvas") mainmap.mapMove(e.clientX,e.clientY,rect.left,rect.top,(e.clientX-rect.left)-smx,(e.clientY-rect.top)-smy,TOOL);
-    if(e.target.id=="brushCanvas") mainmap.mapMove(e.clientX,e.clientY,rect.left,rect.top,(e.clientX-rect.left)-smx,(e.clientY-rect.top)-smy,BRUSH);
+    if(e.target.id=="myCanvas") mainmap.mapMove(e.clientX,e.clientY,rect.left,rect.top,(e.clientX-rect.left)-smx,(e.clientY-rect.top)-smy,camera,MAIN);
+    if(e.target.id=="toolCanvas") mainmap.mapMove(e.clientX,e.clientY,rect.left,rect.top,(e.clientX-rect.left)-smx,(e.clientY-rect.top)-smy,camera,TOOL);
+    if(e.target.id=="brushCanvas") mainmap.mapMove(e.clientX,e.clientY,rect.left,rect.top,(e.clientX-rect.left)-smx,(e.clientY-rect.top)-smy,camera,BRUSH);
 }
 
 function mouseDown(e)
