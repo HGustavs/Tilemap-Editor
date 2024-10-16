@@ -4,10 +4,15 @@
     <style>
         #wrapper{
             display:grid;
-            grid-template-areas: "main hud"
-                                 "main tools"
-                                 "main brush";
+            grid-template-areas: "main hud hud"
+                                 "main tools mini"
+                                 "main brush brush";
+            width:1500px;
 
+        }
+
+        #miniCanvas{
+            grid-area:mini;
         }
 
         #HUDCanvas{
@@ -51,20 +56,21 @@
 //--------------------------------------------------------------------------------------------------------
 // Features                                Finished Features 
 //--------------------------------------------------------------------------------------------------------
-// Tile Drawing in Map                     Minimap
-// Bidirectional Highlight                 Scrolling View
-// Brush Library                           Click+Move draws selection fence
-// Game Character                      
-// Colisions
-// Weapons
-// Animation States
+//                     Minimap
+// Bidirectional Highlight                 Scrolling View                           
+// Game Character                          Click+Move draws selection fence
+// Colisions                               Brush Library
+// Weapons                                 
+// Animation States                        Minimap highlight
 // Transparent Drawing
 // Wave function Collapse
 // Menu System
 // Flood Fill Selection / Brush
-// Minimap highlight
+// Tile Placing in Map 
 // Selection Array Overlay
 // Move between windows state
+// Dynamic size adjust w zoom
+// DataStorage Local Storage
 
 // --------------------=============######## References ########=============--------------------
 
@@ -87,6 +93,7 @@ var keyspressed=[];
 var hudcanvas=null;
 var brushcanvas=null;
 var toolcanvas=null;
+var minicanvas=null;
 var c=null;
 
 const TOOL=1;
@@ -138,6 +145,8 @@ class Tilemap {
           this.toolwidth=Math.floor(tilecntX*tilesize*toolzoom);
           this.toolheight=Math.floor(tilecntY*tilesize*toolzoom);
     }
+
+    // --------------------=============######## UI Movement Event Handler Functions ########=============--------------------    
 
     // Mouse move in brush or tool view
     mapMove(mx,my,rx,ry,dx,dy,camera,kind)
@@ -194,8 +203,6 @@ class Tilemap {
     // Mouse Up in Tool Window
     mapUp(mx,my,rx,ry,kind)
     {
-        console.log(kind,this.p1,this.p2);
-
         // We did not move in tool window i.e. select single tile
         if((kind==TOOL)&&(this.toolMoving==-1)){
             this.p1={x:curx,y:cury};
@@ -217,16 +224,16 @@ class Tilemap {
                 for(var ox=adjx;ox<=Math.max(this.p1.x,this.p2.x);ox++){
                     var destx=ox+curx-adjx;
                     var desty=oy+cury-adjy     ;
-                    if(this.toolMarked==BRUSH){
-                        if((destx<this.brushcntX)&&(desty<this.brushcntY)){
+                    if((destx<this.brushcntX)&&(desty<this.brushcntY)){
+                        if(this.toolMarked==BRUSH){
                             if((destx>Math.max(this.p1.x,this.p2.x))||(desty>Math.max(this.p1.y,this.p2.y))||(destx<Math.min(this.p1.x,this.p2.x))||(desty<Math.min(this.p1.y,this.p2.y))){
                                 this.brushData[(desty*this.brushcntX)+destx]=this.brushData[(oy*this.brushcntX)+ox];
                             }
-                        }
-                    }else if(this.toolMarked==TOOL){
-                        if((destx<this.brushcntX)&&(desty<this.brushcntY)){
+                        }else if(this.toolMarked==TOOL){
                             this.brushData[(desty*this.brushcntX)+destx]=(oy*this.tilecntX)+ox;  
-                        }                            
+                        }else if(this.toolMarked==MAIN){
+                            this.brushData[(desty*this.brushcntX)+destx]=this.tilemap[(oy*this.maptilesX)+ox];
+                        }
                     }
                 }
             }
@@ -235,28 +242,34 @@ class Tilemap {
         redraw=true;
     }
 
-    // Draw minimap overview
+    //------------------------------------------------------------------------------------------
+    // drawMiniView - Refresh miniature map on given canvas
+    //-------------------------------------------------------------------------------------------
+
     drawMiniView(minicanv,camera)
     {
+        minicanv.beginPath();
         for(var xk=0;xk<this.maptilesX;xk++){
             for(var yk=0;yk<this.maptilesY;yk++){
                 var maptile=this.tilemap[(yk*this.maptilesX)+xk];
                 var maptileY=Math.floor(maptile/this.tilecntX);
                 var maptileX=maptile%this.tilecntX;
-                minicanv.drawImage(this.miniimage,maptileX*this.minisize,maptileY*this.minisize,this.minisize,this.minisize,(xk*this.minisize)+this.toolwidth,(yk*this.minisize),this.minisize,this.minisize);
+                minicanv.drawImage(this.miniimage,maptileX*this.minisize,maptileY*this.minisize,this.minisize,this.minisize,(xk*this.minisize),(yk*this.minisize),this.minisize,this.minisize);
+                if(this.hoverTile==maptile){
+                    minicanv.rect((xk*this.minisize)+1,(yk*this.minisize)+1,this.minisize-2,this.minisize-2);
+                }
             }
         }
+        minicanv.globalAlpha=0.5;        
+        minicanv.stroke();
+        minicanv.globalAlpha=1.0;
 
-        // Convert scroll position to mini view pixels
-        // Draw View as Rectangle on Screen
-
+        // Convert scroll position to mini view pixels Draw View as Rectangle on Screen
         var scx=Math.floor((camera.scrollX/this.tileSize))*this.minisize;
         var scy=Math.floor((camera.scrollY/this.tileSize))*this.minisize;
         var sw=(camera.screenTiles+1)*this.minisize;
         var sh=(camera.screenTiles+1)*this.minisize;
-        scx+=this.toolwidth;
         this.drawBox(scx,scy,scx+sw,scy+sh,2,"#f8f",0.4,0,minicanv);
-
     }
 
     //------------------------------------------------------------------------------------------
@@ -327,6 +340,41 @@ class Tilemap {
         this.drawGrid(this.brushcntX*this.tooltilesizeX,this.brushcntY*this.tooltilesizeY,this.tooltilesizeX,this.tooltilesizeY,"#8f8",0.4,brushcanv);
     }
 
+    //------------------------------------------------------------------------------------------
+    // drawBrishView - Redraw main tilemap into the given canvas
+    //-------------------------------------------------------------------------------------------
+
+    drawTilemap(canv,camera)
+    {
+        // We iterate over screentiles +1 tiles
+        var scx=Math.floor((camera.scrollX/this.tileSize));
+        var scy=Math.floor((camera.scrollY/this.tileSize));
+        var offsX=camera.scrollX%this.tileSize;
+        var offsY=camera.scrollY%this.tileSize;
+        for(var i=0;i<(camera.screenTiles+1);i++){
+            for(var j=0;j<(camera.screenTiles+1);j++){
+                // We know which tile so we compare with this.hoverTile
+                this.drawTile(this.tilemap[((scy+i)*this.maptilesX)+(scx+j)],(j*this.tileSize)-offsX,(i*this.tileSize)-offsY,canv);
+                if(this.m1!=null){
+                    if(((scy+i)==this.m1.y)&&((scx+j)==this.m1.x)){
+                        this.m1.scx=(j*this.tileSize)-offsX;
+                        this.m1.scy=(i*this.tileSize)-offsY;
+                    }
+                }
+            }
+        }
+
+        // If mouse hover in main view
+        if(this.m1!=null&&this.toolMoving!=MAIN){
+            this.drawBox(this.m1.scx+2,this.m1.scy+2,this.m1.scx+this.tileSize-2,this.m1.scy+this.tileSize-2,3,"#ff8",0.4,0,canv);
+        } 
+        
+        if(this.toolMoving==MAIN||this.toolMarked==MAIN){
+            this.drawBox((this.p1.x*this.tileSize)-camera.scrollX,(this.p1.y*this.tileSize)-camera.scrollY,(this.p2.x*this.tileSize)-camera.scrollX,(this.p2.y*this.tileSize)-camera.scrollY,3,"#ff8",0.4,this.tileSize,canv);
+        }
+    
+    }      
+
     // --------------------=============######## Generic Drawing Functions ########=============--------------------    
 
     // Draw gridlines in a specified canvas
@@ -377,33 +425,7 @@ class Tilemap {
 
         canv.drawImage(this.image, tileX*this.tileSize, tileY*this.tileSize, this.tileSize, this.tileSize, dx, dy, this.tileSize, this.tileSize)
     }
-
-    // Redraw this tilemap into the given canvas
-    drawTilemap(canv,camera)
-    {
-        // We iterate over screentiles +1 tiles
-        var scx=Math.floor((camera.scrollX/this.tileSize));
-        var scy=Math.floor((camera.scrollY/this.tileSize));
-        var offsX=camera.scrollX%this.tileSize;
-        var offsY=camera.scrollY%this.tileSize;
-        for(var i=0;i<(camera.screenTiles+1);i++){
-            for(var j=0;j<(camera.screenTiles+1);j++){
-                // We know which tile so we compare with this.hoverTile
-                this.drawTile(this.tilemap[((scy+i)*this.maptilesX)+(scx+j)],(j*this.tileSize)-offsX,(i*this.tileSize)-offsY,canv);
-                if(this.m1!=null){
-                    if(((scy+i)==this.m1.y)&&((scx+j)==this.m1.x)){
-                        this.m1.scx=(j*this.tileSize)-offsX;
-                        this.m1.scy=(i*this.tileSize)-offsY;
-                    }
-                }
-            }
-        }
-
-        // If mouse hover in main view
-        if(this.m1!=null){
-            this.drawBox(this.m1.scx+2,this.m1.scy+2,this.m1.scx+this.tileSize-2,this.m1.scy+this.tileSize-2,3,"#ff8",0.4,0,canv);
-        } 
-    }    
+  
 }
 
 //------------------------------------------------------------------------------------------
@@ -504,6 +526,9 @@ function zetup()
     var cc = document.getElementById("brushCanvas");
     brushcanvas = cc.getContext("2d");
 
+    var cc = document.getElementById("miniCanvas");
+    minicanvas = cc.getContext("2d");
+
     var tiles = new Image();
     var minitiles = new Image();
 
@@ -551,7 +576,7 @@ function refresh()
           mainmap.drawToolView(toolcanvas);
           mainmap.drawBrushView(brushcanvas);
           mainmap.drawHUDView(hudcanvas);
-          mainmap.drawMiniView(toolcanvas,camera)
+          mainmap.drawMiniView(minicanvas,camera)
         }
         redraw=false;
     }
@@ -568,5 +593,7 @@ function refresh()
  	  <canvas id="myCanvas" width="640" height="640" style="border:1px solid #000000;" onmousedown="mouseDown(event);" onmouseup="mouseUp(event);" onmousemove="mouseMove(event);" ></canvas> 
  	  <canvas id="toolCanvas" width="600" height="360" style="border:1px solid #888;" onmousedown="mouseDown(event);" onmouseup="mouseUp(event);" onmousemove="mouseMove(event);"></canvas> 
     <canvas id="brushCanvas" width="600" height="360" style="border:1px solid #fff;" onmousedown="mouseDown(event);" onmouseup="mouseUp(event);" onmousemove="mouseMove(event);"></canvas>
+    <canvas id="miniCanvas" width="300" height="300" style="border:1px solid #8ff;"></canvas>
+
   </div>
 </body>
