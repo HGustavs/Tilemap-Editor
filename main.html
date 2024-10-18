@@ -71,6 +71,9 @@
 // Move between windows state
 // Dynamic size adjust w zoom
 // DataStorage Local Storage
+// Undo system compressed edits
+// Saving incl undo history
+// Box resizing to fit maps
 
 // --------------------=============######## References ########=============--------------------
 
@@ -140,6 +143,9 @@ class Tilemap {
           for(var i=0;i<(this.brushcntX*this.brushcntY);i++){
               this.brushData[i]=-1;
           }
+
+          this.brushHistory=new History(this.brushData);
+          this.mainHistory=new History(this.tilemap);
 
           // Computed
           this.toolwidth=Math.floor(tilecntX*tilesize*toolzoom);
@@ -215,24 +221,49 @@ class Tilemap {
             this.toolMarked=kind;
         }
 
-        // If we just do a click in brush view
-        if((kind==BRUSH)&&(this.toolMoving==-1)){
+        // If we click in Main view (drawing)
+        if((kind==MAIN)&&(this.toolMoving==-1)){
             // Iterate over source area for each square
             var adjy=Math.min(this.p1.y,this.p2.y);
             var adjx=Math.min(this.p1.x,this.p2.x);
             for(var oy=adjy;oy<=Math.max(this.p1.y,this.p2.y);oy++){
                 for(var ox=adjx;ox<=Math.max(this.p1.x,this.p2.x);ox++){
                     var destx=ox+curx-adjx;
-                    var desty=oy+cury-adjy     ;
+                    var desty=oy+cury-adjy;
+                    if((destx<this.maptilesX)&&(desty<this.maptilesY)){
+                        if(this.toolMarked==BRUSH){
+                            this.tilemap[(desty*this.maptilesX)+destx]=this.brushData[(oy*this.brushcntX)+ox];
+                        }else if(this.toolMarked==MAIN){
+                        
+                        }else if(this.toolMarked==TOOL){
+                        }
+                    }
+                }
+            }
+        }
+
+        // If we just do a click in brush view
+        if((kind==BRUSH)&&(this.toolMoving==-1)){
+            // Iterate over source area for each square
+            var adjy=Math.min(this.p1.y,this.p2.y);
+            var adjx=Math.min(this.p1.x,this.p2.x);
+            this.brushHistory.saveStack();
+            for(var oy=adjy;oy<=Math.max(this.p1.y,this.p2.y);oy++){
+                for(var ox=adjx;ox<=Math.max(this.p1.x,this.p2.x);ox++){
+                    var destx=ox+curx-adjx;
+                    var desty=oy+cury-adjy;
                     if((destx<this.brushcntX)&&(desty<this.brushcntY)){
                         if(this.toolMarked==BRUSH){
                             if((destx>Math.max(this.p1.x,this.p2.x))||(desty>Math.max(this.p1.y,this.p2.y))||(destx<Math.min(this.p1.x,this.p2.x))||(desty<Math.min(this.p1.y,this.p2.y))){
+                                this.brushHistory.saveItem((desty*this.brushcntX)+destx,this.brushData[(oy*this.brushcntX)+ox]);
                                 this.brushData[(desty*this.brushcntX)+destx]=this.brushData[(oy*this.brushcntX)+ox];
                             }
                         }else if(this.toolMarked==TOOL){
+                            this.brushHistory.saveItem((desty*this.brushcntX)+destx,(oy*this.tilecntX)+ox);
                             this.brushData[(desty*this.brushcntX)+destx]=(oy*this.tilecntX)+ox;  
                         }else if(this.toolMarked==MAIN){
                             this.brushData[(desty*this.brushcntX)+destx]=this.tilemap[(oy*this.maptilesX)+ox];
+                            this.brushHistory.saveItem((desty*this.brushcntX)+destx,(oy*this.tilecntX)+ox);
                         }
                     }
                 }
@@ -452,6 +483,90 @@ class Camera2D {
     }  
 }
 
+//------------------------------------------------------------------------------------------
+// History - Generic Undo History
+//-------------------------------------------------------------------------------------------
+
+class History {
+
+    constructor(arr)
+    {
+        this.stack=[];
+        this.content=arr;
+        this.current=null;
+    }
+
+    // We add this value to the stack and save the prior value
+    saveItem(position,value)
+    {
+        this.stack.push({kind:"i",before:this.content[position],value:value,position:position});
+        this.content[position]=value;
+        this.current=this.stack.length-1;
+    }
+
+    // Add a new history point
+    saveStack()
+    {
+        // If current is not last we remove everything after current
+        this.stack.push({kind:"s"});
+        this.current=this.stack.length-1;
+    }
+
+    // Undo one step behind current
+    undoStack()
+    {
+        if(this.current!=null){
+            var found=-1;
+            // find previous state before current position
+            for(var pos=this.current;pos>=0;pos--){
+                if(this.stack[pos].kind=="s"){
+                    found=pos+1;
+                    break;
+                }
+            }
+            // execute steps between current and previous state and update current position 
+            if(found>-1){
+                for(var pos=found;pos<=this.current;pos++){
+                    var item=this.stack[pos];
+                    if(item.kind=="i") this.content[item.position]=item.before;
+                }
+                this.current=found-2;
+            }
+        }
+        redraw=true;
+    }
+
+    // Redo one step in front of current
+    redoStack()
+    {
+        console.log(this.current);
+        console.log(this.stack);
+
+        if(this.current!=null){
+            var found=-1;
+            // find next state after current position
+            for(var pos=this.current+2;pos<this.stack.length;pos++){
+                if(this.stack[pos].kind=="s"){
+                    found=pos+1;
+                    break;
+                }
+            }
+            if(pos>=this.stack.length) found=this.stack.length;
+            // execute steps between current and previous state and update current position 
+            if(found>-1){
+                for(var pos=this.current;pos<found;pos++){
+                    var item=this.stack[pos];
+                    if(item.kind=="i") this.content[item.position]=item.value;
+                }
+                this.current=found;
+            }
+            console.log(this.current,this.stack);
+        }
+        redraw=true;        
+    }
+
+}
+
 var camera=new Camera2D(20);
 
 // --------------------=============######## Event Handlers ########=============--------------------
@@ -473,6 +588,13 @@ function keyDownOwn(event)
         event.preventDefault();
         return false;
     }
+    if(event.key=="u"){
+        mainmap.brushHistory.undoStack();
+    }
+    if(event.key=="r"){
+        mainmap.brushHistory.redoStack();
+    }
+
 }
 
 function keyUpOwn(event)
@@ -538,7 +660,7 @@ function zetup()
     //drawing of the test image - img1
     tiles.src = 'tilesets/testResultd.png';
     tiles.onload = function () {
-        //mainmap = new Tilemap(51,20,19,66,84,tiles,tilemap,0.5);
+        //mainmap = map(51,20,19,66,84,tiles,tilemap,0.5);
         //mainmap = new Tilemap(32,20,20,66,84,tiles,tilemap,1.0);
         //mainmap = new Tilemap(16,20,20,66,84,tiles,tilemap,2.0,minitiles,4);
         mainmap = new Tilemap(32,20,20,66,84,tiles,tilemap,0.5,minitiles,4,20,20);
