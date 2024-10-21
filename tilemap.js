@@ -1,3 +1,12 @@
+//------------------------------------------------------------------------------------------
+// Constants
+//-------------------------------------------------------------------------------------------
+
+const TOOL=1;
+const BRUSH=2;
+const MAIN=3;
+const FILL=1;
+const DRAW=2;
 
 //------------------------------------------------------------------------------------------
 // Tilemap - Tilemap Class. Image file tile size, tile count of map and tile count of image
@@ -25,20 +34,27 @@ class Tilemap {
           this.toolMoving=false;
           this.toolMarked=false;
           this.hoverTile=null;
+          this.mode=FILL;                 // Default drawing mode
           
           // Components
           this.image=image;
           this.miniimage=miniimage;
           this.tilemap=tilemap;
-          this.p1=null;
-          this.p2=null;
-          this.m1=null;
+          this.selected=[];
+          this.selectionstack=[];       // Selection flood fill stack
+          this.p1=null;                 // Selection box p1
+          this.p2=null;                 // Selection box p2
+          this.m1=null;                 // Hover position incl screen coordinate and tile
+          for(var i=0;i<(this.maptilesX*this.maptilesY);i++){
+              this.selected[i]=-1;
+          }
           this.brushData=[];
           for(var i=0;i<(this.brushcntX*this.brushcntY);i++){
               this.brushData[i]=-1;
           }
           this.brushHistory=new History(this.brushData);
           this.mainHistory=new History(this.tilemap);
+          this.floodfill=new floodfill(this.maptilesX,this.maptilesY,this.tilemap);
 
           // Computed
           this.toolwidth=Math.floor(tilecntX*tilesize*toolzoom);
@@ -74,7 +90,7 @@ class Tilemap {
     // Mouse move in brush or tool view
     mapMove(mx,my,rx,ry,dx,dy,camera,kind)
     {
-        // Read tile number
+        // Read tile position - independent of drawing mode
         if(kind==BRUSH||kind==TOOL){
             curx=Math.floor((mx-rx)/(this.tileSize*this.toolZoom));
             cury=Math.floor((my-ry)/(this.tileSize*this.toolZoom));        
@@ -85,36 +101,44 @@ class Tilemap {
         if(curx<0) cury=0;
         if(cury<0) cury=0;
 
-        if(kind==BRUSH){
-            if(curx>(this.brushcntX-1)) curx=this.brushcntX-1;
-            if(cury>(this.brushcntY-1)) cury=this.brushcntY-1;
-        }else if(kind==TOOL){
-            if(curx>this.tilecntX-1) curx=this.tilecntX-1;
-            if(cury>this.tilecntY-1) cury=this.tilecntY-1;
-            this.hoverTile=(cury*this.tilecntX)+curx;        
-        }else if(kind==MAIN){
-            if(curx>this.mapcntX) curx=this.mapcntX;
-            if(cury>this.mapcntY) cury=this.mapcntY;
-        }
+        if(this.mode==DRAW){
+            if(kind==BRUSH){
+                if(curx>(this.brushcntX-1)) curx=this.brushcntX-1;
+                if(cury>(this.brushcntY-1)) cury=this.brushcntY-1;
+            }else if(kind==TOOL){
+                if(curx>this.tilecntX-1) curx=this.tilecntX-1;
+                if(cury>this.tilecntY-1) cury=this.tilecntY-1;
+                this.hoverTile=(cury*this.tilecntX)+curx;        
+            }else if(kind==MAIN){
+                if(curx>this.mapcntX) curx=this.mapcntX;
+                if(cury>this.mapcntY) cury=this.mapcntY;
+            }
 
-        if(this.toolMoving==false&&kind==MAIN){
+            if(this.toolMoving==false&&kind==MAIN){
+                this.m1={x:curx,y:cury};
+                this.m1.tileno=this.tilemap[(cury*this.maptilesX)+curx];
+                this.hoverTile=this.m1.tileno;
+                redraw=true;        
+            }
+
+            // if toolMoving != false
+            if((Math.abs(dx)>3||Math.abs(dy)>3)&&(this.toolMoving==-1)){
+                this.toolMoving=kind;
+                this.toolMarked=false;
+                this.p1={x:curx,y:cury};
+            }
+
+            if(this.toolMoving==BRUSH||this.toolMoving==TOOL||this.toolMoving==MAIN){
+                this.p2={x:curx,y:cury};
+            }
+            redraw=true;
+        }else if(this.mode==FILL){
+            // Flood fill mode - we made sure we do not update p1,p2 etc that mark tile
             this.m1={x:curx,y:cury};
             this.m1.tileno=this.tilemap[(cury*this.maptilesX)+curx];
             this.hoverTile=this.m1.tileno;
-            redraw=true;        
+            redraw=true; 
         }
-
-        // if toolMoving != false
-        if((Math.abs(dx)>3||Math.abs(dy)>3)&&(this.toolMoving==-1)){
-            this.toolMoving=kind;
-            this.toolMarked=false;
-            this.p1={x:curx,y:cury};
-        }
-
-        if(this.toolMoving==BRUSH||this.toolMoving==TOOL||this.toolMoving==MAIN){
-            this.p2={x:curx,y:cury};
-        }
-        redraw=true;
     }
 
     // Mouse Down in Tool Window
@@ -126,68 +150,73 @@ class Tilemap {
     // Mouse Up in Tool Window
     mapUp(mx,my,rx,ry,kind)
     {
-        // We did not move in tool window i.e. select single tile
-        if((kind==TOOL)&&(this.toolMoving==-1)){
-            this.p1={x:curx,y:cury};
-            this.p2={x:curx,y:cury};
-            this.toolMarked=TOOL;
-        }
-
-        // If mouse is making selection box
-        if(this.toolMoving>0){
-            this.toolMarked=kind;
-        }
-
-        // If we click in Main view (drawing)
-        if((kind==MAIN)&&(this.toolMoving==-1)){
-            // Iterate over source area for each square
-            var adjy=Math.min(this.p1.y,this.p2.y);
-            var adjx=Math.min(this.p1.x,this.p2.x);
-            for(var oy=adjy;oy<=Math.max(this.p1.y,this.p2.y);oy++){
-                for(var ox=adjx;ox<=Math.max(this.p1.x,this.p2.x);ox++){
-                    var destx=ox+curx-adjx;
-                    var desty=oy+cury-adjy;
-                    if((destx<this.maptilesX)&&(desty<this.maptilesY)){
-                        if(this.toolMarked==BRUSH){
-                            this.mainHistory.saveItem((desty*this.maptilesX)+destx,this.brushData[(oy*this.brushcntX)+ox]);
-                        }else if(this.toolMarked==MAIN){
-                            if((destx>Math.max(this.p1.x,this.p2.x))||(desty>Math.max(this.p1.y,this.p2.y))||(destx<Math.min(this.p1.x,this.p2.x))||(desty<Math.min(this.p1.y,this.p2.y))){
-                                this.mainHistory.saveItem((desty*this.maptilesX)+destx,this.tilemap[(oy*this.maptilesX)+ox]);                        
-                            }                        
-                        }else if(this.toolMarked==TOOL){
-                            this.mainHistory.saveItem((desty*this.maptilesX)+destx,(oy*this.tilecntX)+ox);
-                        }
-                    }
-                }
+        if(this.mode==DRAW){
+            // We did not move in tool window i.e. select single tile
+            if((kind==TOOL)&&(this.toolMoving==-1)){
+                this.p1={x:curx,y:cury};
+                this.p2={x:curx,y:cury};
+                this.toolMarked=TOOL;
             }
-        }
 
-        // If we just do a click in brush view
-        if((kind==BRUSH)&&(this.toolMoving==-1)){
-            // Iterate over source area for each square
-            var adjy=Math.min(this.p1.y,this.p2.y);
-            var adjx=Math.min(this.p1.x,this.p2.x);
-            this.brushHistory.saveStack();
-            for(var oy=adjy;oy<=Math.max(this.p1.y,this.p2.y);oy++){
-                for(var ox=adjx;ox<=Math.max(this.p1.x,this.p2.x);ox++){
-                    var destx=ox+curx-adjx;
-                    var desty=oy+cury-adjy;
-                    if((destx<this.brushcntX)&&(desty<this.brushcntY)){
-                        if(this.toolMarked==BRUSH){
-                            if((destx>Math.max(this.p1.x,this.p2.x))||(desty>Math.max(this.p1.y,this.p2.y))||(destx<Math.min(this.p1.x,this.p2.x))||(desty<Math.min(this.p1.y,this.p2.y))){
-                                this.brushHistory.saveItem((desty*this.brushcntX)+destx,this.brushData[(oy*this.brushcntX)+ox]);
+            // If mouse is making selection box
+            if(this.toolMoving>0){
+                this.toolMarked=kind;
+            }
+
+            // If we click in Main view (drawing)
+            if((kind==MAIN)&&(this.toolMoving==-1)){
+                // Iterate over source area for each square
+                var adjy=Math.min(this.p1.y,this.p2.y);
+                var adjx=Math.min(this.p1.x,this.p2.x);
+                for(var oy=adjy;oy<=Math.max(this.p1.y,this.p2.y);oy++){
+                    for(var ox=adjx;ox<=Math.max(this.p1.x,this.p2.x);ox++){
+                        var destx=ox+curx-adjx;
+                        var desty=oy+cury-adjy;
+                        if((destx<this.maptilesX)&&(desty<this.maptilesY)){
+                            if(this.toolMarked==BRUSH){
+                                this.mainHistory.saveItem((desty*this.maptilesX)+destx,this.brushData[(oy*this.brushcntX)+ox]);
+                            }else if(this.toolMarked==MAIN){
+                                if((destx>Math.max(this.p1.x,this.p2.x))||(desty>Math.max(this.p1.y,this.p2.y))||(destx<Math.min(this.p1.x,this.p2.x))||(desty<Math.min(this.p1.y,this.p2.y))){
+                                    this.mainHistory.saveItem((desty*this.maptilesX)+destx,this.tilemap[(oy*this.maptilesX)+ox]);                        
+                                }                        
+                            }else if(this.toolMarked==TOOL){
+                                this.mainHistory.saveItem((desty*this.maptilesX)+destx,(oy*this.tilecntX)+ox);
                             }
-                        }else if(this.toolMarked==TOOL){
-                            this.brushHistory.saveItem((desty*this.brushcntX)+destx,(oy*this.tilecntX)+ox); 
-                        }else if(this.toolMarked==MAIN){
-                            this.brushHistory.saveItem((desty*this.brushcntX)+destx,this.tilemap[(oy*this.maptilesX)+ox]);
                         }
                     }
                 }
             }
+
+            // If we just do a click in brush view
+            if((kind==BRUSH)&&(this.toolMoving==-1)){
+                // Iterate over source area for each square
+                var adjy=Math.min(this.p1.y,this.p2.y);
+                var adjx=Math.min(this.p1.x,this.p2.x);
+                this.brushHistory.saveStack();
+                for(var oy=adjy;oy<=Math.max(this.p1.y,this.p2.y);oy++){
+                    for(var ox=adjx;ox<=Math.max(this.p1.x,this.p2.x);ox++){
+                        var destx=ox+curx-adjx;
+                        var desty=oy+cury-adjy;
+                        if((destx<this.brushcntX)&&(desty<this.brushcntY)){
+                            if(this.toolMarked==BRUSH){
+                                if((destx>Math.max(this.p1.x,this.p2.x))||(desty>Math.max(this.p1.y,this.p2.y))||(destx<Math.min(this.p1.x,this.p2.x))||(desty<Math.min(this.p1.y,this.p2.y))){
+                                    this.brushHistory.saveItem((desty*this.brushcntX)+destx,this.brushData[(oy*this.brushcntX)+ox]);
+                                }
+                            }else if(this.toolMarked==TOOL){
+                                this.brushHistory.saveItem((desty*this.brushcntX)+destx,(oy*this.tilecntX)+ox); 
+                            }else if(this.toolMarked==MAIN){
+                                this.brushHistory.saveItem((desty*this.brushcntX)+destx,this.tilemap[(oy*this.maptilesX)+ox]);
+                            }
+                        }
+                    }
+                }
+            }
+            this.toolMoving=false;
+            redraw=true;
+        }else if(this.mode==FILL){
+            alert("FILL!"+curx+" "+cury);
+
         }
-        this.toolMoving=false;
-        redraw=true;
     }
 
     //------------------------------------------------------------------------------------------
