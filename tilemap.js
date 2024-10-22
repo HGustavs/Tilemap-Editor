@@ -52,9 +52,19 @@ class Tilemap {
           for(var i=0;i<(this.brushcntX*this.brushcntY);i++){
               this.brushData[i]=-1;
           }
+          
+          // Testdata
+          this.brushData[(10*brushcntX)+10]=181;
+          this.brushData[(10*brushcntX)+11]=182;
+          this.brushData[(11*brushcntX)+10]=188;
+          this.brushData[(11*brushcntX)+11]=186;
+          this.p1={x:10,y:10};          
+          this.p2={x:11,y:11};
+          this.toolMarked=BRUSH;          
+
           this.brushHistory=new History(this.brushData);
           this.mainHistory=new History(this.tilemap);
-          this.floodfill=new floodfill(this.maptilesX,this.maptilesY,this.tilemap);
+          this.filler=new Filler(this.maptilesX,this.maptilesY,this.tilemap);
 
           // Computed
           this.toolwidth=Math.floor(tilecntX*tilesize*toolzoom);
@@ -214,8 +224,35 @@ class Tilemap {
             this.toolMoving=false;
             redraw=true;
         }else if(this.mode==FILL){
-            alert("FILL!"+curx+" "+cury);
+            this.filler.floodFill(curx,cury,this.tilemap[(cury*this.maptilesX)+curx],4);
 
+            if(this.toolMarked==TOOL||this.toolMarked==BRUSH){
+                // We compute width of selected area
+                var dx=Math.abs(this.p1.x-this.p2.x)+1;
+                var dy=Math.abs(this.p1.y-this.p2.y)+1;
+                var ox=Math.min(this.p1.x,this.p2.x)
+                var oy=Math.min(this.p1.y,this.p2.y)
+                for(var tileY=0;tileY<this.maptilesY;tileY++){
+                    for(var tileX=0;tileX<this.maptilesX;tileX++){
+                        // We use selected part of either tool or brush area
+                        var index=(tileY*this.maptilesX)+tileX;
+                        if(this.filler.visited[index]!=-1){
+                            if(this.toolMarked==BRUSH){
+                                // We use modulo to compute source tile
+                                //var mapx=ox+(tileX%dx);
+                                //var mapy=oy+(tileY%dy);
+                                var mapx=ox+Math.floor(Math.random()*dx);
+                                var mapy=oy+Math.floor(Math.random()*dy);
+                                this.tilemap[index]=this.brushData[(mapy*this.brushcntX)+mapx];
+                            }
+                        }
+                    }
+                }
+            }
+
+            // We draw using selected items in brush area or in tool area using modulo
+            redraw=true;
+ //           alert("FILL!"+curx+" "+cury+" "+this.tilemap[(cury*this.maptilesX)+curx]);
         }
     }
 
@@ -232,8 +269,14 @@ class Tilemap {
                 var maptileY=Math.floor(maptile/this.tilecntX);
                 var maptileX=maptile%this.tilecntX;
                 minicanv.drawImage(this.miniimage,maptileX*this.minisize,maptileY*this.minisize,this.minisize,this.minisize,(xk*this.minisize),(yk*this.minisize),this.minisize,this.minisize);
-                if(this.hoverTile==maptile){
-                    minicanv.rect((xk*this.minisize)+1,(yk*this.minisize)+1,this.minisize-2,this.minisize-2);
+                if(this.mode==DRAW){
+                    if(this.hoverTile==maptile){
+                        minicanv.rect((xk*this.minisize)+1,(yk*this.minisize)+1,this.minisize-2,this.minisize-2);
+                    }                
+                }else if(this.mode==FILL){
+                    if(this.filler.visited[(yk*this.maptilesX)+xk]!=-1){
+                        minicanv.rect((xk*this.minisize)+1,(yk*this.minisize)+1,this.minisize-2,this.minisize-2);                    
+                    }
                 }
             }
         }

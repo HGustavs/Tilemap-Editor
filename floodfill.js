@@ -20,6 +20,8 @@ class Filler {
           this.tilecntY=tilecntY;
 
           this.tilearr = tilearr;
+
+          this.clearSelection();
     }
 
     clearSelection()
@@ -42,19 +44,19 @@ class Filler {
 
         do{
             var item=this.stack.pop();
-            var index=(item.tiley*this.tilecntX)+item.tilex;
+            var index=(item.yk*this.tilecntX)+item.xk;
 
             // We process item if inside array
             if(item.xk>=0&&item.xk<this.tilecntX&&item.yk>=0&&item.yk<this.tilecntY){
                 // If inside array and not previously visited
-                alert(item.tileX+" "+item.tileY+" "+this.tilearr[index]);
+                //alert(item.xk+" "+item.yk+" "+this.tilearr[index]);
                 if((this.visited[index]==-1)&&(this.tilearr[index]==target)){
                     if(kind==4){
                         this.visited[index]=1;
-                        this.stack.push({xk:item.tileX+1,yk:item.tileY,target:target,kind:kind});
-                        this.stack.push({xk:item.tileX-1,yk:item.tileY,target:target,kind:kind});
-                        this.stack.push({xk:item.tileX,yk:item.tileY+1,target:target,kind:kind});
-                        this.stack.push({xk:item.tileX,yk:item.tileY-1,target:target,kind:kind});
+                        this.stack.push({xk:item.xk+1,yk:item.yk,target:target,kind:kind});
+                        this.stack.push({xk:item.xk-1,yk:item.yk,target:target,kind:kind});
+                        this.stack.push({xk:item.xk,yk:item.yk+1,target:target,kind:kind});
+                        this.stack.push({xk:item.xk,yk:item.yk-1,target:target,kind:kind});
                     }
                 }
 
