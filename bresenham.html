@@ -1,0 +1,295 @@
+<html>
+<head>
+<script>
+
+  var cnt=0;
+
+  var tileMap=[
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,
+      0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,
+      0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,
+      0,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,
+      0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,
+      0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,
+      0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,
+      0,1,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,
+      0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,
+      0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,0,
+      0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,0,
+      0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,0,
+      0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,0,
+      0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,1,0,
+      0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,1,0,
+      0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,0,
+      0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,0,
+      0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,0,
+      0,1,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,1,0,
+      0,1,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,
+      0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,1,0,1,0,
+      0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,  
+      0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+  ];
+
+  var visibility=[
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+  ];
+
+  function GetDistance(x1,y1,x2,y2)
+  {
+      return (y2-y1)+(x2-x1);
+  }
+  
+  function TraceLine(ox,oy,x2,y2,rangeLimit)
+  {
+    var xDiff = x2 - ox;
+    var yDiff = y2 - oy;
+    var xLen = Math.abs(xDiff);
+    var yLen = Math.abs(yDiff);
+    var xInc = Math.sign(xDiff);
+    var yInc = Math.sign(yDiff)<<16;
+    var index = (oy<<16) + ox;
+    if(xLen < yLen){
+      var tmp;
+      tmp=xLen;
+      xLen=yLen;
+      yLen=tmp;
+      tmp=xInc;
+      xInc=yInc;
+      yInc=tmp;
+    }
+    var errorInc = yLen*2;
+    var error = -xLen;
+    var errorReset = xLen*2;
+    while(--xLen >= 0) // skip the first point (the origin) since it's always visible and should never stop rays
+    {
+      index += xInc; // advance down the long axis (could be X or Y)
+      error += errorInc;
+      if(error > 0) {
+          error -= errorReset;
+          index += yInc; 
+      }
+      var x = index & 0xFFFF;
+      var y = index >> 16;
+      //if(rangeLimit >= 0 && GetDistance(ox,oy, x, y) > rangeLimit) break;
+      //visibility[(y*30)+x]++;
+      cnt++;
+      visibility[(y*30)+x]=1;
+      if(tileMap[(y*30)+x]==1) break;
+    }
+  }
+
+  var pox=15;
+  var poy=15;
+
+  cnt=0;
+  for(var i=0;i<30;i++){
+      TraceLine(pox,poy,0,i,200); 
+      TraceLine(pox,poy,29,i,200); 
+      TraceLine(pox,poy,i,0,200); 
+      TraceLine(pox,poy,i,29,200);       
+  }
+  //alert(cnt);
+
+/*
+  cnt=0;
+  for(var i=0;i<(Math.PI*2);i+=(Math.PI/50)){
+      TraceLine(pox,poy,pox+(Math.cos(i)*15),poy+(Math.sin(i)*15),200); 
+  }
+  alert(cnt);
+*/
+
+  // We add tiles together using the following pattern
+  //    01     |     pos-cnt     | 16 |   |  32 |     
+  // 02    04  |  pos-1   pos+1  |====|===|=====|
+  //    08     |     pos+cnt     | 64 |   | 128 | 
+  //
+  // Minimum number of if statements - we make sure that bounds checks have already been performed
+
+  function tileVisibility(xk,yk,cnt)
+  {
+      // Base index
+      var index=(yk*tilecntx)+xk;
+
+      // Shifted versions of each tile
+      val=0;
+
+      // Cross tiles
+      val+=visibility[index-cnt];
+      val+=visibility[index-1]>>1;
+      val+=visibility[index+1]>>2;
+      val+=visibility[index+cnt]>>3;
+
+      // Corner tiles
+      val+=visibility[index-cnt-1]>>4;
+      val+=visibility[index-cnt+1]>>5;
+      val+=visibility[index+cnt-1]>>6;
+      val+=visibility[index+cnt+1]>>7;
+  }
+
+  const tileWidth=32;
+  const tilecntX=16;
+
+  // Some 
+
+  function composite(a,b)
+  {
+      // return Math.min(a,b);
+      return a*b;
+  }
+
+  function saturate(col)
+  {
+      return Math.max(0.0,Math.min(1.0,col));
+  }
+
+  function curves(col)
+  {
+      //return col;
+      
+      return saturate((col*2.0)-0.2);
+  }
+
+  function tileGen(tx,ty,top,left,right,bottom,topleft,topright,bottomleft,bottomright)
+  {
+      // Draw tile pixels
+      c.fillStyle="#000";
+      for(var yk=0;yk<tileWidth;yk++){
+          var col;
+          for(var xk=0;xk<tileWidth;xk++){
+              var u=xk/tileWidth;
+              var v=yk/tileWidth;
+              col=1.0;
+              
+              if(top){
+                  col=composite(col,curves(v));
+              }
+              if(bottom){
+                  col=composite(col,curves(1.0-v));
+              }
+              if(left){
+                  col=composite(col,curves(u));
+              }
+              if(right){
+                  col=composite(col,curves(1.0-u));
+              }
+              if(topleft&&(!top)&&(!left)){
+                  col=composite(col,curves((Math.sqrt((u*u)+(v*v)))));
+              }
+              if(topright&&(!top)&&(!right)){
+                  col=composite(col,curves((Math.sqrt(((1.0-u)*(1.0-u))+(v*v)))));
+              }
+              if(bottomleft&&(!bottom)&&(!left)){
+                  col=composite(col,curves((Math.sqrt((u*u)+((1.0-v)*(1.0-v))))));              
+              }
+              if(bottomright&&(!bottom)&&(!right)){
+                  col=composite(col,curves((Math.sqrt(((1.0-u)*(1.0-u))+((1.0-v)*(1.0-v))))));              
+              }
+
+              c.globalAlpha=1.0-col;
+              c.fillRect(tx+xk,ty+yk,1,1);
+          }
+          //console.log(col);
+      }
+  }
+
+
+  var colors=["#000","#222","#333","#444","#555","#666","#777","#888","#999"];
+
+  // Canvas setup
+  var c=null;
+  function szetup()
+  {
+      var cc = document.getElementById("myCanvas");
+      c = cc.getContext("2d");
+
+      var xk=0;
+      var yk=0;
+      for(var no=0;no<256;no++){
+          tileGen(xk,yk,no&1,(no>>1)&1,(no>>2)&1,(no>>3)&1,(no>>4)&1,(no>>5)&1,(no>>6)&1,(no>>7)&1);
+          xk+=tileWidth;
+          if((no%tilecntX)==(tilecntX-1)){
+              xk=0;
+              yk+=tileWidth;
+          }
+      }
+
+      c.globalAlpha=1.0;
+      c.strokeStyle = "blue";
+      c.beginPath();
+      for(var xk=0;xk<=(tileWidth*tilecntX);xk+=tileWidth){
+          c.moveTo(xk,0);
+          c.lineTo(xk,tileWidth*tilecntX);
+      }
+      for(var yk=0;yk<=(tileWidth*tilecntX);yk+=tileWidth){
+          c.moveTo(0,yk,0);
+          c.lineTo(tileWidth*tilecntX,yk);
+      }      
+      c.stroke();  
+
+/*
+      for(var yk=0;yk<30;yk++){
+          for(var xk=0;xk<30;xk++){
+              c.fillStyle="#666";          
+              //if(tileMap[(yk*30)+xk]==1){
+              //    c.fillStyle="#666";              
+              //}
+              if(visibility[(yk*30)+xk]>=1){
+                  c.fillStyle="#666";
+                  if(tileMap[(yk*30)+xk]==1){
+                      c.fillStyle="#666";              
+                  }             
+              }else if(visibility[(yk*30)+xk]==0){
+                  c.fillStyle="#222";
+                  if(tileMap[(yk*30)+xk]==1){
+                      c.fillStyle="#222";              
+                  }                 
+              }
+
+              c.fillRect(xk*20,yk*20,20,20);
+          }
+      }
+*/
+  }
+
+  </script>
+  </head>
+  <body onload="szetup();">
+   	  <canvas id="myCanvas" width="640" height="640" style="border:1px solid #000000;" ></canvas> 
+  </body>
+  <html>
