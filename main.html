@@ -8,16 +8,43 @@
                                  "main tools mini"
                                  "main brush brush";
             width:1500px;
-
         }
 
         #miniCanvas{
             grid-area:mini;
         }
 
-        #HUDCanvas{
+        #HUD{
             grid-area:hud;
+            position: relative;
+            display: inline-block;
+            height:32px;
+            width:400px;
         }
+
+        #HUDCanvas{
+            width:400px;
+        }
+
+        .dropdown-content {
+          display: block;
+          position: absolute;
+          background-color: #444;
+          width: 400px;
+          height:32px;
+          top:0px;
+          z-index: 100;
+          overflow-y: clip;
+          box-shadow: none;
+        }
+
+        #HUD:hover .dropdown-content {
+          display: block;
+          height:128px;
+          width:400px;
+          overflow-y:visible;
+          box-shadow: 4px 4px 16px 16px rgba(0,0,0,0.7);
+        }        
 
         #myCanvas{
             grid-area:main;
@@ -246,8 +273,12 @@ function refresh()
 
   <div id="infobar"></div>
   <div id="wrapper">
- 	  <canvas id="HUDCanvas" width="616" height="32" style="border:1px solid #804;" ></canvas>     
- 	  <canvas id="myCanvas" width="640" height="640" style="border:1px solid #000000;" onmousedown="mouseDown(event);" onmouseup="mouseUp(event);" onmousemove="mouseMove(event);" ></canvas> 
+ 	  <div id="HUD">
+        <div class="dropdown-content">
+     	      <canvas id="HUDCanvas" width="400" height="128"></canvas>     
+        </div>
+    </div>
+    <canvas id="myCanvas" width="640" height="640" style="border:1px solid #000000;" onmousedown="mouseDown(event);" onmouseup="mouseUp(event);" onmousemove="mouseMove(event);" ></canvas> 
  	  <canvas id="toolCanvas" width="600" height="360" style="border:1px solid #888;" onmousedown="mouseDown(event);" onmouseup="mouseUp(event);" onmousemove="mouseMove(event);"></canvas> 
     <canvas id="brushCanvas" width="600" height="360" style="border:1px solid #fff;" onmousedown="mouseDown(event);" onmouseup="mouseUp(event);" onmousemove="mouseMove(event);"></canvas>
     <canvas id="miniCanvas" width="300" height="300" style="border:1px solid #8ff;"></canvas>
