@@ -7,6 +7,8 @@ const BRUSH=2;
 const MAIN=3;
 const FILL=1;
 const DRAW=2;
+const ICONOFFS=84;
+const ICONSPACING=34;
 
 //------------------------------------------------------------------------------------------
 // Tilemap - Tilemap Class. Image file tile size, tile count of map and tile count of image
@@ -301,8 +303,23 @@ class Tilemap {
         hudcanv.font = "26px arial narrow";
         hudcanv.textBaseline = "top";
         hudcanv.fillStyle="#fff";
-        hudcanv.clearRect(0,0,64,30);
+        hudcanv.clearRect(0,0,320,128);
         hudcanv.fillText(this.hoverTile, 0, 0);
+
+        // this.mode == FILL || this.mode==DRAW
+
+        for(var i=0;i<4;i++){
+            if(i==0) Floppy(hudcanv,ICONOFFS+(i*ICONSPACING),4);
+            if(i==1){
+                Brush(hudcanv,ICONOFFS+(i*ICONSPACING)-2,4);
+            }
+            if(i==2){
+                Paint(hudcanv,ICONOFFS+(i*ICONSPACING),4);
+                if(this.mode==FILL) this.drawBox(ICONOFFS+(i*ICONSPACING),4,ICONOFFS+(i*ICONSPACING)+ICONSPACING,ICONSPACING+8,2,"#def",0.7,0,hudcanv);            
+            }
+            if(i==3) Elevation(hudcanv,ICONOFFS+(i*ICONSPACING),4);
+        }
+
     }
 
     //------------------------------------------------------------------------------------------

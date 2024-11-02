@@ -1,4 +1,18 @@
-function Floppy(){
+function drawIcon(no,xk,yk,highlight,press,canv)
+{
+    c.save();
+    c.translate(xk,yk);
+    if(no==0) Floppy(canv);
+    if(no==1) Brush(canv);
+    if(no==2) Paint(canv);
+    if(no==3) Elevation(canv);
+    if(no==4) Undo(canv);
+    if(no==5) Redo(canv);
+    c.restore();
+}
+
+function Floppy(c,xk,yk){
+
    c.globalAlpha=1.0;
    // --------======####FloppyGrp START ####======--------
       c.fillStyle='#244FA2';
@@ -125,7 +139,7 @@ function Floppy(){
       // --------======#### END ####======--------
 }
 
-function Folder(){
+function Folder(c,xk,yk){
    // --------======####FolderGrp START ####======--------
          //--==## SVGID_1_ linearGradient ##==--
       var SVGID_1_=c.createLinearGradient(16,5,15,32);
@@ -364,7 +378,7 @@ function Export(){
    c.fill();
 }
 
-function Paint(){
+function Paint(c,xk,yk){
    c.fillStyle='#000';
    c.beginPath();
    c.moveTo(28,10);
@@ -489,7 +503,7 @@ function Paint(){
    c.fill();
 }
 
-function Brush(){
+function Brush(c,xk,yk){
    c.fillStyle='#9F9F9F';
    c.beginPath();
    c.moveTo(23,4);
@@ -795,7 +809,7 @@ function Delete(){
       // --------======#### END ####======--------
 }
 
-function Elevation(){
+function Elevation(c,xk,yk){
       //--==## SVGID_00000061470433902399580060000009659382073167961512_ linearGradient ##==--
    var SVGID_00000061470433902399580060000009659382073167961512_=c.createLinearGradient(18,28,18,-5);
    SVGID_00000061470433902399580060000009659382073167961512_.addColorStop(0,'RGB(218,169,128)');
