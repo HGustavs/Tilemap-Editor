@@ -334,67 +334,8 @@ function Folder(ctx){
 }
 
 function Redo(ctx){
+   //--==## Dial ##==--
    ctx.beginPath();
-
-   ctx.moveTo(18.7,6.6);
-   ctx.lineTo(18.7,6);
-   ctx.lineTo(19.9,6);
-   ctx.bezierCurveTo(20.1,6,20.2,5.8,20.2,5.7);
-   ctx.lineTo(20.2,4.5);
-   ctx.bezierCurveTo(20.2,4.3,20,4.2,19.9,4.2);
-   ctx.lineTo(17.1,4.2);
-   ctx.bezierCurveTo(16.9,4.2,16.8,4.4,16.8,4.5);
-   ctx.lineTo(16.8,5.6);
-   ctx.bezierCurveTo(16.8,5.8,17,5.9,17.1,5.9);
-   ctx.lineTo(18.3,5.9);
-   ctx.lineTo(18.3,6.5);
-   ctx.bezierCurveTo(13.6,6.6,9.7,10.5,9.7,15.3);
-   ctx.bezierCurveTo(9.7,20.2,13.7,24.1,18.5,24.1);
-   ctx.bezierCurveTo(23.4,24.1,27.3,20.1,27.3,15.3);
-   ctx.bezierCurveTo(27.3,10.7,23.5,6.8,18.7,6.6);
-   ctx.lineTo(18.7,6.6);
-   ctx.moveTo(17.3,5.2);
-   ctx.lineTo(17.3,4.9);
-   ctx.bezierCurveTo(17.3,4.7,17.4,4.6,17.6,4.6);
-   ctx.lineTo(19.3,4.6);
-   ctx.bezierCurveTo(19.5,4.6,19.6,4.7,19.6,4.9);
-   ctx.lineTo(19.6,5.2);
-   ctx.bezierCurveTo(19.6,5.4,19.5,5.5,19.3,5.5);
-   ctx.lineTo(17.6,5.5);
-   ctx.bezierCurveTo(17.5,5.5,17.3,5.4,17.3,5.2);
-   ctx.lineTo(17.3,5.2);
-   ctx.moveTo(18.5,23.5);
-   ctx.bezierCurveTo(14.1,23.5,10.5,19.9,10.5,15.5);
-   ctx.bezierCurveTo(10.5,11.1,14.1,7.5,18.5,7.5);
-   ctx.bezierCurveTo(22.9,7.5,26.5,11.1,26.5,15.5);
-   ctx.bezierCurveTo(26.5,19.9,22.9,23.5,18.5,23.5);
-   ctx.lineTo(18.5,23.5);
-
-   ctx.moveTo(18.5,8.2);
-   ctx.bezierCurveTo(14.5,8.2,11.3,11.4,11.3,15.4);
-   ctx.bezierCurveTo(11.3,19.4,14.5,22.6,18.5,22.6);
-   ctx.bezierCurveTo(22.5,22.6,25.7,19.4,25.7,15.4);
-   ctx.bezierCurveTo(25.7,11.5,22.5,8.2,18.5,8.2);
-   ctx.lineTo(18.5,8.2);
-   ctx.moveTo(18.7,21.8);
-   ctx.lineTo(18.7,21.3);
-   ctx.lineTo(18.2,21.3);
-   ctx.lineTo(18.2,21.8);
-   ctx.bezierCurveTo(14.9,21.7,12.2,19,12.1,15.7);
-   ctx.lineTo(12.6,15.7);
-   ctx.lineTo(12.6,15.2);
-   ctx.lineTo(12.1,15.2);
-   ctx.bezierCurveTo(12.2,11.9,14.9,9.2,18.2,9.1);
-   ctx.lineTo(18.2,9.7);
-   ctx.lineTo(18.7,9.7);
-   ctx.lineTo(18.7,9.1);
-   ctx.bezierCurveTo(22,9.2,24.7,11.9,24.8,15.2);
-   ctx.lineTo(24.2,15.2);
-   ctx.lineTo(24.2,15.7);
-   ctx.lineTo(24.8,15.7);
-   ctx.bezierCurveTo(24.7,19,22,21.7,18.7,21.8);
-   ctx.lineTo(18.7,21.8);
-
    ctx.moveTo(22.3,19.5);
    ctx.lineTo(21.4,18.4);
    ctx.lineTo(19.8,16.5);
@@ -420,19 +361,17 @@ function Redo(ctx){
    ctx.lineTo(17.6,15.6);
 
    // --------======####Arrow START ####======--------
-
       ctx.moveTo(9.1,23);
       ctx.bezierCurveTo(8.4,23.7,7.7,24.4,7,25.1);
       ctx.bezierCurveTo(5.8,24.4,4,20.7,3.5,18.2);
       ctx.bezierCurveTo(2.9,15.6,3.1,13,4,10.5);
       ctx.bezierCurveTo(4.9,8,6.4,5.9,8.5,4.1);
-      ctx.bezierCurveTo(8.3,3.8,8.1,3.5,7.9,3.1);
-      ctx.bezierCurveTo(8.7,3.2,9.5,3.3,10.3,3.4);
-      ctx.bezierCurveTo(11.1,3.5,11.8,3.5,12.6,3.6);
-      ctx.bezierCurveTo(11.9,5,11.3,6.4,10.8,8);
-      ctx.bezierCurveTo(10.5,7.6,10.3,7.2,10.1,6.8);
-      ctx.bezierCurveTo(8.5,8.2,7.5,9.8,6.8,11.7);
-      ctx.bezierCurveTo(6.2,13.6,6.1,15.6,6.5,17.6);
+      ctx.bezierCurveTo(8.3,3.8,7.8,3.1,7.6,2.7);
+      ctx.bezierCurveTo(8.4,2.8,11.5,3.4,12.6,3.6);
+      ctx.bezierCurveTo(12.1,5.2,11.6,6.8,11,8.4);
+      ctx.bezierCurveTo(10.7,8,10.3,7.3,10,6.9);
+      ctx.bezierCurveTo(8.4,8.3,7.4,9.9,6.7,11.8);
+      ctx.bezierCurveTo(6.1,13.7,6,15.7,6.4,17.7);
       ctx.bezierCurveTo(6.9,19.7,7.8,21.4,9.1,23);
       ctx.lineTo(9.1,23);
 
@@ -464,55 +403,74 @@ function Redo(ctx){
       ctx.bezierCurveTo(20.9,29.6,20.5,29.6,19.9,29.7);
       ctx.bezierCurveTo(19.9,28.7,19.7,27.7,19.5,26.7);
       ctx.lineTo(19.5,26.7);
-      
-      ctx.fill();
+
       // --------======#### END ####======--------
+      
+   //--==## Watch ##==--
+   ctx.moveTo(18.9,6.7);
+   ctx.lineTo(18.9,5.9);
+   ctx.lineTo(19.9,5.9);
+   ctx.bezierCurveTo(20.1,5.9,20.2,5.7,20.2,5.6);
+   ctx.lineTo(20.2,4.5);
+   ctx.bezierCurveTo(20.2,4.3,20,4.2,19.9,4.2);
+   ctx.lineTo(17.1,4.2);
+   ctx.bezierCurveTo(16.9,4.2,16.8,4.4,16.8,4.5);
+   ctx.lineTo(16.8,5.6);
+   ctx.bezierCurveTo(16.8,5.8,17,5.9,17.1,5.9);
+   ctx.lineTo(18.1,5.9);
+   ctx.lineTo(18.1,6.7);
+   ctx.bezierCurveTo(13.4,6.9,9.7,10.8,9.7,15.5);
+   ctx.bezierCurveTo(9.7,20.4,13.7,24.3,18.5,24.3);
+   ctx.bezierCurveTo(23.4,24.3,27.3,20.3,27.3,15.5);
+   ctx.bezierCurveTo(27.3,10.8,23.6,6.9,18.9,6.7);
+   ctx.lineTo(18.9,6.7);
+   ctx.moveTo(18.7,21.8);
+   ctx.lineTo(18.7,21.3);
+   ctx.lineTo(18.2,21.3);
+   ctx.lineTo(18.2,21.8);
+   ctx.bezierCurveTo(14.9,21.7,12.2,19,12.1,15.7);
+   ctx.lineTo(12.7,15.7);
+   ctx.lineTo(12.7,15.2);
+   ctx.lineTo(12.1,15.2);
+   ctx.bezierCurveTo(12.2,11.9,14.9,9.2,18.2,9.1);
+   ctx.lineTo(18.2,9.7);
+   ctx.lineTo(18.7,9.7);
+   ctx.lineTo(18.7,9.2);
+   ctx.bezierCurveTo(22,9.3,24.7,12,24.8,15.3);
+   ctx.lineTo(24.3,15.3);
+   ctx.lineTo(24.3,15.8);
+   ctx.lineTo(24.8,15.8);
+   ctx.bezierCurveTo(24.7,19.1,22.1,21.7,18.7,21.8);
+   ctx.lineTo(18.7,21.8);
+
+   ctx.fill();
 }
 
 function Undo(ctx){
+      //--==## Watch path ##==--
    ctx.beginPath();
-
-   ctx.moveTo(3.3,15.4);
+   ctx.moveTo(12.5,6.6);
+   ctx.lineTo(12.5,5.9);
+   ctx.lineTo(13.5,5.9);
+   ctx.bezierCurveTo(13.7,5.9,13.8,5.7,13.8,5.6);
+   ctx.lineTo(13.8,4.4);
+   ctx.bezierCurveTo(13.8,4.2,13.6,4.1,13.5,4.1);
+   ctx.lineTo(10.7,4.1);
+   ctx.bezierCurveTo(10.5,4.1,10.4,4.3,10.4,4.4);
+   ctx.lineTo(10.4,5.5);
+   ctx.bezierCurveTo(10.4,5.7,10.6,5.8,10.7,5.8);
+   ctx.lineTo(11.7,5.8);
+   ctx.lineTo(11.7,6.6);
+   ctx.bezierCurveTo(7,6.8,3.3,10.7,3.3,15.4);
    ctx.bezierCurveTo(3.3,20.3,7.3,24.2,12.1,24.2);
    ctx.bezierCurveTo(17,24.2,20.9,20.2,20.9,15.4);
-   ctx.bezierCurveTo(20.9,10.6,17.1,6.7,12.3,6.6);
-   ctx.lineTo(12.3,6);
-   ctx.lineTo(13.5,6);
-   ctx.bezierCurveTo(13.7,6,13.8,5.8,13.8,5.7);
-   ctx.lineTo(13.8,4.5);
-   ctx.bezierCurveTo(13.8,4.3,13.6,4.2,13.5,4.2);
-   ctx.lineTo(10.7,4.2);
-   ctx.bezierCurveTo(10.5,4.2,10.4,4.4,10.4,4.5);
-   ctx.lineTo(10.4,5.6);
-   ctx.bezierCurveTo(10.4,5.8,10.6,5.9,10.7,5.9);
-   ctx.lineTo(11.9,5.9);
-   ctx.lineTo(11.9,6.5);
-   ctx.bezierCurveTo(7.1,6.7,3.3,10.6,3.3,15.4);
-   ctx.lineTo(3.3,15.4);
-   ctx.moveTo(12.9,5.5);
-   ctx.lineTo(11.2,5.5);
-   ctx.bezierCurveTo(11,5.5,10.9,5.4,10.9,5.2);
-   ctx.lineTo(10.9,4.9);
-   ctx.bezierCurveTo(10.9,4.7,11,4.6,11.2,4.6);
-   ctx.lineTo(12.9,4.6);
-   ctx.bezierCurveTo(13.1,4.6,13.2,4.7,13.2,4.9);
-   ctx.lineTo(13.2,5.2);
-   ctx.bezierCurveTo(13.3,5.4,13.1,5.5,12.9,5.5);
-   ctx.lineTo(12.9,5.5);
-   ctx.moveTo(4,15.4);
-   ctx.bezierCurveTo(4,11,7.6,7.4,12,7.4);
-   ctx.bezierCurveTo(16.4,7.4,20,11,20,15.4);
-   ctx.bezierCurveTo(20,19.8,16.4,23.4,12,23.4);
-   ctx.bezierCurveTo(7.7,23.4,4,19.8,4,15.4);
-   ctx.lineTo(4,15.4);
-
-   ctx.moveTo(4.8,15.4);
-   ctx.bezierCurveTo(4.8,19.4,8,22.6,12,22.6);
-   ctx.bezierCurveTo(16,22.6,19.2,19.4,19.2,15.4);
-   ctx.bezierCurveTo(19.2,11.4,16,8.2,12,8.2);
-   ctx.bezierCurveTo(8.1,8.2,4.8,11.4,4.8,15.4);
-   ctx.lineTo(4.8,15.4);
-   ctx.moveTo(5.7,15.7);
+   ctx.bezierCurveTo(20.9,10.7,17.2,6.9,12.5,6.6);
+   ctx.lineTo(12.5,6.6);
+   ctx.moveTo(12.3,21.8);
+   ctx.lineTo(12.3,21.3);
+   ctx.lineTo(11.8,21.3);
+   ctx.lineTo(11.8,21.8);
+   ctx.bezierCurveTo(8.5,21.7,5.8,19,5.7,15.7);
    ctx.lineTo(6.3,15.7);
    ctx.lineTo(6.3,15.2);
    ctx.lineTo(5.7,15.2);
@@ -524,13 +482,9 @@ function Undo(ctx){
    ctx.lineTo(17.9,15.2);
    ctx.lineTo(17.9,15.7);
    ctx.lineTo(18.4,15.7);
-   ctx.bezierCurveTo(18.3,19,15.6,21.7,12.3,21.8);
-   ctx.lineTo(12.3,21.3);
-   ctx.lineTo(11.8,21.3);
-   ctx.lineTo(11.8,21.8);
-   ctx.bezierCurveTo(8.5,21.6,5.9,19,5.7,15.7);
-   ctx.lineTo(5.7,15.7);
-
+   ctx.bezierCurveTo(18.3,19,15.6,21.6,12.3,21.8);
+   ctx.lineTo(12.3,21.8);
+ 
    ctx.moveTo(15.9,19.4);
    ctx.lineTo(15,18.3);
    ctx.lineTo(13.4,16.4);
@@ -554,23 +508,7 @@ function Undo(ctx){
    ctx.bezierCurveTo(13,16,12.6,16.4,12.1,16.4);
    ctx.bezierCurveTo(11.2,16,11.2,16,11.2,15.5);
    ctx.lineTo(11.2,15.5);
-
    // --------======####Arrow_00000079471509766822954260000003758130298103195558_ START ####======--------
-      ctx.moveTo(21.5,23);
-      ctx.bezierCurveTo(22.2,23.7,22.9,24.4,23.6,25.1);
-      ctx.bezierCurveTo(24.8,24.4,26.6,20.7,27.1,18.2);
-      ctx.bezierCurveTo(27.6,15.6,27.4,13,26.5,10.5);
-      ctx.bezierCurveTo(25.6,8,24.1,5.9,22,4.2);
-      ctx.bezierCurveTo(22.2,3.9,22.4,3.5,22.6,3.1);
-      ctx.bezierCurveTo(21.8,3.2,21,3.3,20.2,3.4);
-      ctx.bezierCurveTo(19.4,3.5,18.7,3.5,17.9,3.6);
-      ctx.bezierCurveTo(18.6,5,19.2,6.5,19.7,8);
-      ctx.bezierCurveTo(20,7.6,20.2,7.2,20.4,6.8);
-      ctx.bezierCurveTo(22,8.2,23,9.8,23.7,11.7);
-      ctx.bezierCurveTo(24.3,13.6,24.4,15.6,24,17.6);
-      ctx.bezierCurveTo(23.7,19.6,22.8,21.4,21.5,23);
-      ctx.lineTo(21.5,23);
-
       ctx.moveTo(20.4,27.8);
       ctx.bezierCurveTo(21,27.4,21.5,27,22.1,26.6);
       ctx.bezierCurveTo(21.5,25.8,20.9,25,20.2,24.2);
@@ -599,7 +537,21 @@ function Undo(ctx){
       ctx.bezierCurveTo(9.6,29.6,10,29.6,10.6,29.7);
       ctx.bezierCurveTo(10.7,28.7,10.9,27.7,11,26.7);
       ctx.lineTo(11,26.7);
-      
+
+      ctx.moveTo(21.5,23);
+      ctx.bezierCurveTo(22.2,23.7,22.9,24.4,23.6,25.1);
+      ctx.bezierCurveTo(24.8,24.4,26.6,20.7,27.1,18.2);
+      ctx.bezierCurveTo(27.6,15.6,27.4,13,26.5,10.5);
+      ctx.bezierCurveTo(25.6,8,24.1,5.9,22,4.2);
+      ctx.bezierCurveTo(22.3,3.8,22.7,3,23,2.7);
+      ctx.bezierCurveTo(22.2,2.8,19.1,3.4,18,3.6);
+      ctx.bezierCurveTo(18.5,5.2,19,6.8,19.6,8.4);
+      ctx.bezierCurveTo(19.9,8,20.3,7.3,20.6,6.9);
+      ctx.bezierCurveTo(22.2,8.3,23.2,9.9,23.9,11.8);
+      ctx.bezierCurveTo(24.5,13.7,24.6,15.7,24.2,17.7);
+      ctx.bezierCurveTo(23.7,19.6,22.8,21.4,21.5,23);
+      ctx.lineTo(21.5,23);
+
       ctx.fill();
       // --------======#### END ####======--------
 }

@@ -320,8 +320,8 @@ class Tilemap {
         // this.mode == FILL || this.mode==DRAW
         for(var i=0;i<6;i++){
             drawIcon(i,ICONOFFS+(i*ICONSPACING),2,ICONSPACING,ICONSPACING,(i==2&&this.mode==FILL),0,hudcanv);
-            drawIcon(i+6,ICONOFFS+(i*ICONSPACING),4+ICONSPACING,ICONSPACING,ICONSPACING,false,0,hudcanv);
-            drawIcon(i+12,ICONOFFS+(i*ICONSPACING),6+(ICONSPACING*2),ICONSPACING,ICONSPACING,false,0,hudcanv);
+            drawIcon(i+6,ICONOFFS+(i*ICONSPACING),2+ICONSPACING,ICONSPACING,ICONSPACING,false,0,hudcanv);
+            drawIcon(i+12,ICONOFFS+(i*ICONSPACING),4+(ICONSPACING*2),ICONSPACING,ICONSPACING,false,0,hudcanv);
         }
 
     }
