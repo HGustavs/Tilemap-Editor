@@ -18,20 +18,17 @@
             grid-area:hud;
             position: relative;
             display: inline-block;
-            height:32px;
-            width:400px;
+            height:40px;
         }
 
         #HUDCanvas{
-            width:400px;
         }
 
         .dropdown-content {
           display: block;
           position: absolute;
           background-color: #444;
-          width: 400px;
-          height:32px;
+          height:40px;
           top:0px;
           z-index: 100;
           overflow-y: clip;
@@ -41,7 +38,6 @@
         #HUD:hover .dropdown-content {
           display: block;
           height:128px;
-          width:400px;
           overflow-y:visible;
           box-shadow: 4px 4px 16px 16px rgba(0,0,0,0.7);
         }        
@@ -173,7 +169,9 @@ function mouseUp(e)
     if(e.target.id=="toolCanvas") mainmap.mapUp(e.clientX,e.clientY,rect.left,rect.top,TOOL);
     if(e.target.id=="brushCanvas") mainmap.mapUp(e.clientX,e.clientY,rect.left,rect.top,BRUSH);    
     if(e.target.id=="myCanvas") mainmap.mapUp(e.clientX,e.clientY,rect.left,rect.top,MAIN);
+    if(e.target.id=="HUDCanvas") mainmap.mapUp(e.clientX,e.clientY,rect.left,rect.top,HUD);
 }
+
 
 function mouseMove(e)
 {
@@ -181,6 +179,7 @@ function mouseMove(e)
     if(e.target.id=="myCanvas") mainmap.mapMove(e.clientX,e.clientY,rect.left,rect.top,(e.clientX-rect.left)-smx,(e.clientY-rect.top)-smy,camera,MAIN);
     if(e.target.id=="toolCanvas") mainmap.mapMove(e.clientX,e.clientY,rect.left,rect.top,(e.clientX-rect.left)-smx,(e.clientY-rect.top)-smy,camera,TOOL);
     if(e.target.id=="brushCanvas") mainmap.mapMove(e.clientX,e.clientY,rect.left,rect.top,(e.clientX-rect.left)-smx,(e.clientY-rect.top)-smy,camera,BRUSH);
+    if(e.target.id=="HUDCanvas") mainmap.mapMove(e.clientX,e.clientY,rect.left,rect.top,(e.clientX-rect.left)-smx,(e.clientY-rect.top)-smy,camera,HUD);
 }
 
 function mouseDown(e)
@@ -192,6 +191,7 @@ function mouseDown(e)
     if(e.target.id=="myCanvas") mainmap.mapDown(e.clientX,e.clientY,rect.left,rect.top,MAIN);
     if(e.target.id=="toolCanvas") mainmap.mapDown(e.clientX,e.clientY,rect.left,rect.top,TOOL);
     if(e.target.id=="brushCanvas") mainmap.mapDown(e.clientX,e.clientY,rect.left,rect.top,BRUSH);
+    if(e.target.id=="HUDCanvas") mainmap.mapDown(e.clientX,e.clientY,rect.left,rect.top,HUD);
 }
 
 function zetup()
@@ -276,7 +276,7 @@ function refresh()
   <div id="wrapper">
  	  <div id="HUD">
         <div class="dropdown-content">
-     	      <canvas id="HUDCanvas" width="400" height="128"></canvas>     
+     	      <canvas id="HUDCanvas" width="400" height="128" onmousedown="mouseDown(event);" onmouseup="mouseUp(event);" onmousemove="mouseMove(event);"></canvas>     
         </div>
     </div>
     <canvas id="myCanvas" width="640" height="640" style="border:1px solid #000000;" onmousedown="mouseDown(event);" onmouseup="mouseUp(event);" onmousemove="mouseMove(event);" ></canvas> 

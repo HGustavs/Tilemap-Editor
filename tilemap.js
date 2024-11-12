@@ -2,11 +2,17 @@
 // Constants
 //-------------------------------------------------------------------------------------------
 
+// Current Canvas Constants
 const TOOL=1;
 const BRUSH=2;
 const MAIN=3;
+const HUD=4;
+
+// Mode Constants
 const FILL=1;
 const DRAW=2;
+
+// HUD Icon Spacing
 const ICONOFFS=84;
 const ICONSPACING=34;
 
@@ -109,6 +115,11 @@ class Tilemap {
         }else if(kind==MAIN){
             curx=Math.floor((mx-rx+camera.scrollX)/this.tileSize);
             cury=Math.floor((my-ry+camera.scrollY)/this.tileSize);        
+        }else if(kind==HUD){
+            // 84 118 152 186 220
+            curx=Math.floor((mx-rx-ICONOFFS)/ICONSPACING);
+            cury=Math.floor((my-ry)/ICONSPACING);
+            console.log(curx,cury,(mx-rx),(my-ry));         
         }
         if(curx<0) cury=0;
         if(cury<0) cury=0;
@@ -291,7 +302,7 @@ class Tilemap {
         var scy=Math.floor((camera.scrollY/this.tileSize))*this.minisize;
         var sw=(camera.screenTiles+1)*this.minisize;
         var sh=(camera.screenTiles+1)*this.minisize;
-        this.drawBox(scx,scy,scx+sw,scy+sh,2,"#f8f",0.4,0,minicanv);
+        drawBox(scx,scy,scx+sw,scy+sh,2,"#f8f",0.4,0,minicanv);
     }
 
     //------------------------------------------------------------------------------------------
@@ -307,17 +318,10 @@ class Tilemap {
         hudcanv.fillText(this.hoverTile, 0, 0);
 
         // this.mode == FILL || this.mode==DRAW
-
-        for(var i=0;i<4;i++){
-            if(i==0) Floppy(hudcanv,ICONOFFS+(i*ICONSPACING),4);
-            if(i==1){
-                Brush(hudcanv,ICONOFFS+(i*ICONSPACING)-2,4);
-            }
-            if(i==2){
-                Paint(hudcanv,ICONOFFS+(i*ICONSPACING),4);
-                if(this.mode==FILL) this.drawBox(ICONOFFS+(i*ICONSPACING),4,ICONOFFS+(i*ICONSPACING)+ICONSPACING,ICONSPACING+8,2,"#def",0.7,0,hudcanv);            
-            }
-            if(i==3) Elevation(hudcanv,ICONOFFS+(i*ICONSPACING),4);
+        for(var i=0;i<6;i++){
+            drawIcon(i,ICONOFFS+(i*ICONSPACING),2,ICONSPACING,ICONSPACING,(i==2&&this.mode==FILL),0,hudcanv);
+            drawIcon(i+6,ICONOFFS+(i*ICONSPACING),4+ICONSPACING,ICONSPACING,ICONSPACING,false,0,hudcanv);
+            drawIcon(i+12,ICONOFFS+(i*ICONSPACING),6+(ICONSPACING*2),ICONSPACING,ICONSPACING,false,0,hudcanv);
         }
 
     }
@@ -335,7 +339,7 @@ class Tilemap {
 
         // Thick yellow box surrounding selected tiles
         if(this.toolMoving==TOOL||this.toolMarked==TOOL){
-            this.drawBox(this.p1.x*this.tileSize*this.toolZoom,this.p1.y*this.tileSize*this.toolZoom,this.p2.x*this.tileSize*this.toolZoom,this.p2.y*this.tileSize*this.toolZoom,3,"#ff8",0.4,this.tileSize*this.toolZoom,toolcanv);
+            drawBox(this.p1.x*this.tileSize*this.toolZoom,this.p1.y*this.tileSize*this.toolZoom,this.p2.x*this.tileSize*this.toolZoom,this.p2.y*this.tileSize*this.toolZoom,3,"#ff8",0.4,this.tileSize*this.toolZoom,toolcanv);
         }
 
         // Pink box surrounding hovered tile
@@ -344,7 +348,7 @@ class Tilemap {
             var y1=Math.floor(this.m1.tileno/this.tilecntX)*this.tileSize*this.toolZoom;
             var x2=x1+(this.tileSize*this.toolZoom);
             var y2=y1+(this.tileSize*this.toolZoom);
-            this.drawBox(x1,y1,x2,y2,3,"#f8f",0.4,0,toolcanv);
+            drawBox(x1,y1,x2,y2,3,"#f8f",0.4,0,toolcanv);
         }
 
     }
@@ -370,7 +374,7 @@ class Tilemap {
 
         // Thick yellow box surrounding selected tiles
         if(this.toolMoving==BRUSH||this.toolMarked==BRUSH){
-            this.drawBox(this.p1.x*this.tileSize*this.toolZoom,this.p1.y*this.tileSize*this.toolZoom,this.p2.x*this.tileSize*this.toolZoom,this.p2.y*this.tileSize*this.toolZoom,3,"#ff8",0.4,this.tileSize*this.toolZoom,brushcanv);
+            drawBox(this.p1.x*this.tileSize*this.toolZoom,this.p1.y*this.tileSize*this.toolZoom,this.p2.x*this.tileSize*this.toolZoom,this.p2.y*this.tileSize*this.toolZoom,3,"#ff8",0.4,this.tileSize*this.toolZoom,brushcanv);
         }
 
         // Draw grid lines over image
@@ -403,11 +407,11 @@ class Tilemap {
 
         // If mouse hover in main view
         if(this.m1!=null&&this.toolMoving!=MAIN){
-            this.drawBox(this.m1.scx+2,this.m1.scy+2,this.m1.scx+this.tileSize-2,this.m1.scy+this.tileSize-2,3,"#ff8",0.4,0,canv);
+            drawBox(this.m1.scx+2,this.m1.scy+2,this.m1.scx+this.tileSize-2,this.m1.scy+this.tileSize-2,3,"#ff8",0.4,0,canv);
         } 
         
         if(this.toolMoving==MAIN||this.toolMarked==MAIN){
-            this.drawBox((this.p1.x*this.tileSize)-camera.scrollX,(this.p1.y*this.tileSize)-camera.scrollY,(this.p2.x*this.tileSize)-camera.scrollX,(this.p2.y*this.tileSize)-camera.scrollY,3,"#ff8",0.4,this.tileSize,canv);
+            drawBox((this.p1.x*this.tileSize)-camera.scrollX,(this.p1.y*this.tileSize)-camera.scrollY,(this.p2.x*this.tileSize)-camera.scrollX,(this.p2.y*this.tileSize)-camera.scrollY,3,"#ff8",0.4,this.tileSize,canv);
         }
     
     }      
@@ -429,28 +433,6 @@ class Tilemap {
             canv.lineTo(width,i);        
         }
         canv.stroke();
-        canv.globalAlpha=1.0;
-    }
-
-    // drawBox draws a line rectangle when given two unordered points
-    drawBox(x1,y1,x2,y2,linewidth,color,opacity,offs,canv)
-    {
-        var px1=Math.min(x1,x2);
-        var py1=Math.min(y1,y2);
-        var px2=Math.max(x1,x2)+offs;
-        var py2=Math.max(y1,y2)+offs;        
-
-        canv.globalAlpha=opacity;
-        canv.beginPath();
-        canv.lineWidth=linewidth;
-        canv.strokeStyle=color;
-        canv.moveTo(px1,py1);
-        canv.lineTo(px2,py1);
-        canv.lineTo(px2,py2);
-        canv.lineTo(px1,py2);
-        canv.closePath();
-        canv.stroke();
-        canv.lineWidth=1.0;
         canv.globalAlpha=1.0;
     }
 
