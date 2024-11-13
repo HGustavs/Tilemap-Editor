@@ -26,19 +26,22 @@ function drawIcon(no,xk,yk,iconwidth,iconheight,highlight,press,canv)
     canv.translate(xk,yk);
 
     canv.fillStyle='#FFFFFF';
+    canv.beginPath();
 
-    if(highlight) drawBox(0,0,iconwidth,iconheight+4,2,"#fed",0.7,0,canv);    
+    if(highlight) drawBox(0,0,iconwidth,iconheight,2,"#fed",0.7,0,canv);    
     if(no==0) Floppy(canv);
     if(no==1) Brush(canv);
     if(no==2) Paint(canv);
     if(no==3) Elevation(canv);
     if(no==4) Undo(canv);
+    if(no==5) Visibility(canv);
     if(no==10) Redo(canv);
 
     if(no==6) Folder(canv);
 
     if(no==12) Export(canv);
 
+    canv.fill();
     canv.restore();
 }
 
@@ -65,89 +68,86 @@ function Square(){
    ctx.fill();
 }
 
-function Visibility(){
-   // --------======####Light START ####======--------
-      ctx.fillStyle='#FFFFFF';
-      ctx.beginPath();
-      ctx.moveTo(15.5,2.9);
-      ctx.lineTo(16.5,2.9);
-      ctx.lineTo(16.5,6.6);
-      ctx.lineTo(15.5,6.6);
+function Visibility(ctx){
+      // --------======####Light START ####======--------
+      ctx.moveTo(15.5,6.7);
+      ctx.lineTo(16.6,6.6);
+      ctx.lineTo(16.6,2.9);
       ctx.lineTo(15.5,2.9);
+      ctx.lineTo(15.5,6.7);
 
       ctx.moveTo(24.8,14.9);
-      ctx.lineTo(28.5,14.9);
+      ctx.lineTo(24.7,15.9);
       ctx.lineTo(28.5,15.9);
-      ctx.lineTo(24.8,15.9);
+      ctx.lineTo(28.5,14.9);
       ctx.lineTo(24.8,14.9);
 
-      ctx.moveTo(23.4,9.6);
-      ctx.lineTo(27.1,9.6);
-      ctx.lineTo(27.1,10.6);
+      ctx.moveTo(27,9.6);
+      ctx.lineTo(26.5,8.7);
       ctx.lineTo(23.4,10.6);
-      ctx.lineTo(23.4,9.6);
+      ctx.lineTo(23.8,11.5);
+      ctx.lineTo(27,9.6);
 
-      ctx.moveTo(19.6,5.7);
-      ctx.lineTo(23.3,5.7);
-      ctx.lineTo(23.3,6.7);
-      ctx.lineTo(19.6,6.7);
-      ctx.lineTo(19.6,5.7);
+      ctx.moveTo(20,7.5);
+      ctx.lineTo(20.9,8.1);
+      ctx.lineTo(22.8,4.9);
+      ctx.lineTo(21.9,4.4);
+      ctx.lineTo(20,7.5);
 
-      ctx.moveTo(15.5,24.2);
-      ctx.lineTo(16.5,24.2);
+      ctx.moveTo(15.5,27.9);
       ctx.lineTo(16.5,27.9);
-      ctx.lineTo(15.5,27.9);
+      ctx.lineTo(16.5,24.2);
       ctx.lineTo(15.5,24.2);
+      ctx.lineTo(15.5,27.9);
 
-      ctx.moveTo(24.7,19);
-      ctx.lineTo(25.7,19);
-      ctx.lineTo(25.7,22.7);
-      ctx.lineTo(24.7,22.7);
-      ctx.lineTo(24.7,19);
+      ctx.moveTo(23.3,20.3);
+      ctx.lineTo(26.6,22.2);
+      ctx.lineTo(27.1,21.3);
+      ctx.lineTo(23.9,19.5);
+      ctx.lineTo(23.3,20.3);
 
-      ctx.moveTo(20.8,22.9);
-      ctx.lineTo(21.8,22.9);
-      ctx.lineTo(21.8,26.6);
-      ctx.lineTo(20.8,26.6);
-      ctx.lineTo(20.8,22.9);
+      ctx.moveTo(20,23.4);
+      ctx.lineTo(21.8,26.5);
+      ctx.lineTo(22.7,26);
+      ctx.lineTo(20.8,22.8);
+      ctx.lineTo(20,23.4);
 
-      ctx.moveTo(3.3,14.9);
-      ctx.lineTo(7,14.9);
-      ctx.lineTo(7,15.9);
-      ctx.lineTo(3.3,15.9);
+      ctx.moveTo(7,14.9);
       ctx.lineTo(3.3,14.9);
+      ctx.lineTo(3.3,15.9);
+      ctx.lineTo(7.1,15.9);
+      ctx.lineTo(7,14.9);
 
-      ctx.moveTo(6.1,8.3);
-      ctx.lineTo(7.1,8.3);
-      ctx.lineTo(7.1,12);
-      ctx.lineTo(6.1,12);
-      ctx.lineTo(6.1,8.3);
+      ctx.moveTo(8.6,10.6);
+      ctx.lineTo(5.3,8.7);
+      ctx.lineTo(4.8,9.6);
+      ctx.lineTo(8,11.4);
+      ctx.lineTo(8.6,10.6);
 
-      ctx.moveTo(4.8,20.3);
-      ctx.lineTo(8.5,20.3);
-      ctx.lineTo(8.5,21.3);
-      ctx.lineTo(4.8,21.3);
-      ctx.lineTo(4.8,20.3);
+      ctx.moveTo(4.7,21.3);
+      ctx.lineTo(5.3,22.2);
+      ctx.lineTo(8.4,20.4);
+      ctx.lineTo(8,19.4);
+      ctx.lineTo(4.7,21.3);
 
-      ctx.moveTo(8.8,24.2);
-      ctx.lineTo(12.5,24.2);
-      ctx.lineTo(12.5,25.2);
-      ctx.lineTo(8.8,25.2);
-      ctx.lineTo(8.8,24.2);
+      ctx.moveTo(9.2,26);
+      ctx.lineTo(10.1,26.5);
+      ctx.lineTo(12,23.4);
+      ctx.lineTo(11.1,22.8);
+      ctx.lineTo(9.2,26);
 
-      ctx.moveTo(10,4.4);
-      ctx.lineTo(11,4.4);
-      ctx.lineTo(11,8.1);
-      ctx.lineTo(10,8.1);
-      ctx.lineTo(10,4.4);
+      ctx.moveTo(11.9,7.6);
+      ctx.lineTo(10.1,4.4);
+      ctx.lineTo(9.2,4.9);
+      ctx.lineTo(11.1,8.2);
+      ctx.lineTo(11.9,7.6);
 
       ctx.moveTo(8.1,15.4);
       ctx.bezierCurveTo(8.1,19.5,11.3,22.9,15.3,23.2);
       ctx.lineTo(15.3,7.6);
       ctx.bezierCurveTo(11.2,7.9,8.1,11.3,8.1,15.4);
       ctx.lineTo(8.1,15.4);
-      // --------======#### END ####======--------
-      
+
       // --------======####Stippling START ####======--------
 
       ctx.moveTo(18.1,22.9);
@@ -198,16 +198,10 @@ function Visibility(){
       ctx.lineTo(18.4,7.9);
       ctx.bezierCurveTo(18.2,7.8,17.9,7.8,17.6,7.7);
       ctx.lineTo(17.6,7.7);
-
-      ctx.fill();
-      // --------======#### END ####======--------
 }
 
 function Folder(ctx){
-   // --------======####Stippling_00000163035540097796950980000017996340976698674599_ START ####======--------
-
-      ctx.beginPath();
-
+      // --------======#### Stippling START ####======--------
       ctx.moveTo(20.4,14.3);
       ctx.lineTo(10.3,25);
       ctx.lineTo(11.2,25);
@@ -329,13 +323,10 @@ function Folder(ctx){
    ctx.bezierCurveTo(29.1,13.5,29.3,13.7,29.3,14);
    ctx.lineTo(25.8,25.7);
    ctx.lineTo(25.8,25.7);
-
-   ctx.fill();
 }
 
 function Redo(ctx){
    //--==## Dial ##==--
-   ctx.beginPath();
    ctx.moveTo(22.3,19.5);
    ctx.lineTo(21.4,18.4);
    ctx.lineTo(19.8,16.5);
@@ -442,13 +433,10 @@ function Redo(ctx){
    ctx.lineTo(24.8,15.8);
    ctx.bezierCurveTo(24.7,19.1,22.1,21.7,18.7,21.8);
    ctx.lineTo(18.7,21.8);
-
-   ctx.fill();
 }
 
 function Undo(ctx){
       //--==## Watch path ##==--
-   ctx.beginPath();
    ctx.moveTo(12.5,6.6);
    ctx.lineTo(12.5,5.9);
    ctx.lineTo(13.5,5.9);
@@ -552,12 +540,10 @@ function Undo(ctx){
       ctx.bezierCurveTo(23.7,19.6,22.8,21.4,21.5,23);
       ctx.lineTo(21.5,23);
 
-      ctx.fill();
       // --------======#### END ####======--------
 }
 
 function Floppy(ctx){
-   ctx.beginPath();
 
    ctx.moveTo(21.9,4.2);
    ctx.lineTo(5.9,4.2);
@@ -628,13 +614,10 @@ function Floppy(ctx){
    ctx.lineTo(21.1,16.8);
    ctx.lineTo(21.1,17.4);
    ctx.lineTo(21.1,17.4);
-
-   ctx.fill();
 }
 
 function Elevation(ctx){
-   ctx.beginPath();
-   
+
    ctx.moveTo(9.1,3.1);
    ctx.bezierCurveTo(6.8,3.1,5,5,5,7.2);
    ctx.bezierCurveTo(5,9.4,6.8,11.3,9.1,11.3);
@@ -702,14 +685,10 @@ function Elevation(ctx){
    ctx.lineTo(20.9,25.5);
    ctx.lineTo(19.7,24);
    ctx.lineTo(19.7,24);
-   
-   ctx.fill();
 }
 
 function Paint(ctx){
    // --------======#### Stippling START ####======--------
-      ctx.beginPath();
-
       ctx.moveTo(16.3,5.1);
       ctx.bezierCurveTo(16.2,5.1,16.2,5.1,16.3,5.1);
       ctx.lineTo(12.7,8.1);
@@ -837,13 +816,9 @@ function Paint(ctx){
    ctx.bezierCurveTo(25.6,5.7,25.6,5.7,25.6,6.8);
    ctx.bezierCurveTo(25.5,7.9,21.4,8.9,16.2,8.9);
    ctx.lineTo(16.2,8.9);
-
-   ctx.fill();
 }
 
 function Brush(ctx){
-   ctx.beginPath();
-   
    ctx.moveTo(28.1,9.1);
    ctx.lineTo(26.2,9.8);
    ctx.lineTo(27.3,8.2);
@@ -907,22 +882,16 @@ function Brush(ctx){
    ctx.bezierCurveTo(9.8,23.3,9.8,23.3,9.8,24.2);
    ctx.bezierCurveTo(9.1,25.8,9.1,25.8,8.2,25.8);
    ctx.lineTo(8.2,25.8);
-
-   ctx.fill();
 }
 
 function Export(ctx){
 
-   ctx.beginPath();
-   ctx.moveTo(20.1,9.4);
-   ctx.lineTo(26.1,9.4);
-   ctx.lineTo(26.1,9.4);
-   ctx.lineTo(20.1,4.1);
-   ctx.lineTo(20.1,9.4);
-   ctx.fill();
+     ctx.moveTo(20.1,9.4);
+     ctx.lineTo(26.1,9.4);
+     ctx.lineTo(26.1,9.4);
+     ctx.lineTo(20.1,4.1);
+     ctx.lineTo(20.1,9.4);
    // --------======#### START ####======--------
-      ctx.fillStyle='#FFFFFF';
-      ctx.beginPath();
       ctx.moveTo(11.3,18.7);
       ctx.lineTo(19,18.7);
       ctx.bezierCurveTo(18.7,18.4,18.4,18.2,18,17.9);
@@ -1032,7 +1001,4 @@ function Export(ctx){
    ctx.bezierCurveTo(11.8,15.5,12.1,15.5,12.5,15.5);
    ctx.bezierCurveTo(14.4,15.5,16.5,15.7,18.7,16.9);
    ctx.bezierCurveTo(19.8,17.7,20.7,18.7,20.9,19.9);
-   ctx.lineTo(20.9,19.9);
-
-   ctx.fill();
 }
