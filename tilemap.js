@@ -2,6 +2,13 @@
 // Constants
 //-------------------------------------------------------------------------------------------
 
+// Features / Bugs
+
+// Draw/Fill in Selected Box in Main View with clicked tool view tile
+// Random Fill Icon tool option
+// Empty Tile Does Not Fill or Draw
+// History for flood Fill
+
 // Current Canvas Constants
 const TOOL=1;
 const BRUSH=2;
@@ -39,8 +46,8 @@ class Tilemap {
           this.tooltilesizeX=this.tileSize*this.toolZoom;
           this.tooltilesizeY=this.tileSize*this.toolZoom;          
           
-          this.toolMoving=false;
-          this.toolMarked=false;
+          this.toolMoving=false;          // Currently moving window
+          this.toolMarked=false;          // Current selection window
           this.hoverTile=null;
           this.mode=FILL;                 // Default drawing mode
           
@@ -118,13 +125,12 @@ class Tilemap {
         }else if(kind==HUD){
             // 84 118 152 186 220
             curx=Math.floor((mx-rx-ICONOFFS)/ICONSPACING);
-            cury=Math.floor((my-ry)/ICONSPACING);
-            console.log(curx,cury,(mx-rx),(my-ry));         
+            cury=Math.floor((my-ry)/ICONSPACING);         
         }
         if(curx<0) cury=0;
         if(cury<0) cury=0;
 
-        if(this.mode==DRAW){
+        if(this.mode==DRAW||this.mode==FILL){
             if(kind==BRUSH){
                 if(curx>(this.brushcntX-1)) curx=this.brushcntX-1;
                 if(cury>(this.brushcntY-1)) cury=this.brushcntY-1;
@@ -145,23 +151,23 @@ class Tilemap {
             }
 
             // if toolMoving != false
+            if(this.toolMoving==BRUSH||this.toolMoving==TOOL||(this.toolMoving==MAIN&&this.mode==DRAW)){
+                this.p2={x:curx,y:cury};
+            }
+
             if((Math.abs(dx)>3||Math.abs(dy)>3)&&(this.toolMoving==-1)){
-                this.toolMoving=kind;
+                if(this.mode==FILL&&kind==MAIN){
+                    // Do nothing in main view otherwise same as drawing mode
+                }else{
+                    this.toolMoving=kind;
+                }
                 this.toolMarked=false;
                 this.p1={x:curx,y:cury};
             }
 
-            if(this.toolMoving==BRUSH||this.toolMoving==TOOL||this.toolMoving==MAIN){
-                this.p2={x:curx,y:cury};
-            }
             redraw=true;
-        }else if(this.mode==FILL){
-            // Flood fill mode - we made sure we do not update p1,p2 etc that mark tile
-            this.m1={x:curx,y:cury};
-            this.m1.tileno=this.tilemap[(cury*this.maptilesX)+curx];
-            this.hoverTile=this.m1.tileno;
-            redraw=true; 
         }
+
     }
 
     // Mouse Down in Tool Window
@@ -173,7 +179,8 @@ class Tilemap {
     // Mouse Up in Tool Window
     mapUp(mx,my,rx,ry,kind)
     {
-        if(this.mode==DRAW){
+        // Selection is same for fill and draw modes
+        if(this.mode==DRAW||this.mode==FILL){
             // We did not move in tool window i.e. select single tile
             if((kind==TOOL)&&(this.toolMoving==-1)){
                 this.p1={x:curx,y:cury};
@@ -186,6 +193,13 @@ class Tilemap {
                 this.toolMarked=kind;
             }
 
+            this.toolMoving=false;        
+            redraw=true;
+        }
+        
+        if(kind==HUD){
+                alert("HUDPRESS!");
+        }else if(this.mode==DRAW){
             // If we click in Main view (drawing)
             if((kind==MAIN)&&(this.toolMoving==-1)){
                 // Iterate over source area for each square
@@ -234,37 +248,41 @@ class Tilemap {
                     }
                 }
             }
-            this.toolMoving=false;
-            redraw=true;
         }else if(this.mode==FILL){
-            this.filler.floodFill(curx,cury,this.tilemap[(cury*this.maptilesX)+curx],4);
+            // We click in main view e.g. perform a flood fill!
+            if(kind==MAIN){
+                this.filler.floodFill(curx,cury,this.tilemap[(cury*this.maptilesX)+curx],4);
 
-            if(this.toolMarked==TOOL||this.toolMarked==BRUSH){
-                // We compute width of selected area
-                var dx=Math.abs(this.p1.x-this.p2.x)+1;
-                var dy=Math.abs(this.p1.y-this.p2.y)+1;
-                var ox=Math.min(this.p1.x,this.p2.x)
-                var oy=Math.min(this.p1.y,this.p2.y)
-                for(var tileY=0;tileY<this.maptilesY;tileY++){
-                    for(var tileX=0;tileX<this.maptilesX;tileX++){
-                        // We use selected part of either tool or brush area
-                        var index=(tileY*this.maptilesX)+tileX;
-                        if(this.filler.visited[index]!=-1){
-                            if(this.toolMarked==BRUSH){
-                                // We use modulo to compute source tile
-                                //var mapx=ox+(tileX%dx);
-                                //var mapy=oy+(tileY%dy);
-                                var mapx=ox+Math.floor(Math.random()*dx);
-                                var mapy=oy+Math.floor(Math.random()*dy);
-                                this.tilemap[index]=this.brushData[(mapy*this.brushcntX)+mapx];
+                // If tool or brush are selected we fill flood filled areas using selected area in p1 and p2
+                if(this.toolMarked==TOOL||this.toolMarked==BRUSH){
+                    // We compute width of selected area
+                    var dx=Math.abs(this.p1.x-this.p2.x)+1;
+                    var dy=Math.abs(this.p1.y-this.p2.y)+1;
+                    var ox=Math.min(this.p1.x,this.p2.x)
+                    var oy=Math.min(this.p1.y,this.p2.y)
+                    for(var tileY=0;tileY<this.maptilesY;tileY++){
+                        for(var tileX=0;tileX<this.maptilesX;tileX++){
+                            // We use selected part of either tool or brush area
+                            var index=(tileY*this.maptilesX)+tileX;
+                            if(this.filler.visited[index]!=-1){
+                                if(this.toolMarked==BRUSH){
+                                    // We use modulo to compute source tile
+                                    //var mapx=ox+(tileX%dx);
+                                    //var mapy=oy+(tileY%dy);
+                                    var mapx=ox+Math.floor(Math.random()*dx);
+                                    var mapy=oy+Math.floor(Math.random()*dy);
+                                    this.tilemap[index]=this.brushData[(mapy*this.brushcntX)+mapx];
+                                }else if(this.toolMarked==TOOL){
+                                    var mapx=ox+Math.floor(Math.random()*dx);
+                                    var mapy=oy+Math.floor(Math.random()*dy);
+                                    this.tilemap[index]=(this.tilecntX*mapy)+mapx;
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            // We draw using selected items in brush area or in tool area using modulo
-            redraw=true;
+            }
  //           alert("FILL!"+curx+" "+cury+" "+this.tilemap[(cury*this.maptilesX)+curx]);
         }
     }
@@ -317,11 +335,12 @@ class Tilemap {
         hudcanv.clearRect(0,0,320,128);
         hudcanv.fillText(this.hoverTile, 0, 0);
 
+        var curt=(cury*6)+curx;
         // this.mode == FILL || this.mode==DRAW
-        for(var i=0;i<6;i++){
-            drawIcon(i,ICONOFFS+(i*ICONSPACING),2,ICONSPACING,ICONSPACING,(i==2&&this.mode==FILL),0,hudcanv);
-            drawIcon(i+6,ICONOFFS+(i*ICONSPACING),2+ICONSPACING,ICONSPACING,ICONSPACING,false,0,hudcanv);
-            drawIcon(i+12,ICONOFFS+(i*ICONSPACING),4+(ICONSPACING*2),ICONSPACING,ICONSPACING,false,0,hudcanv);
+        for(var i=0;i<18;i++){
+            if(i<7||i==10||i==12){
+                drawIcon(i,ICONOFFS+((i%6)*ICONSPACING),2+(Math.floor(i/6)*ICONSPACING),ICONSPACING,ICONSPACING,(i==2&&this.mode==FILL),curt,0,hudcanv);
+            }
         }
 
     }

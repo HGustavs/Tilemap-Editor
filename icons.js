@@ -20,15 +20,25 @@ function drawBox(x1,y1,x2,y2,linewidth,color,opacity,offs,canv)
     canv.globalAlpha=1.0;
 }
 
-function drawIcon(no,xk,yk,iconwidth,iconheight,highlight,press,canv)
+function drawIcon(no,xk,yk,iconwidth,iconheight,highlight,hoverno,press,canv)
 {
     canv.save();
     canv.translate(xk,yk);
 
-    canv.fillStyle='#FFFFFF';
+    console.log(hoverno,no);
+
+    if(highlight) drawBox(0,0,iconwidth,iconheight,2,"#fed",0.7,0,canv);   
+
+    if(hoverno==no){
+        canv.fillStyle="#fff";
+        canv.fillRect(0,0,iconwidth,iconheight);
+        canv.fillStyle='#000';    
+    }else{
+        canv.fillStyle='#FFF';
+    }
+
     canv.beginPath();
 
-    if(highlight) drawBox(0,0,iconwidth,iconheight,2,"#fed",0.7,0,canv);    
     if(no==0) Floppy(canv);
     if(no==1) Brush(canv);
     if(no==2) Paint(canv);
@@ -38,7 +48,6 @@ function drawIcon(no,xk,yk,iconwidth,iconheight,highlight,press,canv)
     if(no==10) Redo(canv);
 
     if(no==6) Folder(canv);
-
     if(no==12) Export(canv);
 
     canv.fill();
