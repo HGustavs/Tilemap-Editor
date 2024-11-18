@@ -34,7 +34,7 @@ const ICONSPACING=34;
 class Tilemap {
 
     // Tilecnt is in tile atlas and maptiles is in tile map array
-    constructor(tilesize,tilecntX,tilecntY,maptilesX,maptilesY,image,tilemap,toolzoom,miniimage,minisize,brushcntX,brushcntY)
+    constructor(tilesize,tilecntX,tilecntY,maptilesX,maptilesY,image,tilemap,toolzoom,miniimage,minisize,brushcntX,brushcntY,elevationmap)
     {
           // Attributes
           this.tileSize = tilesize;
@@ -59,6 +59,7 @@ class Tilemap {
           this.image=image;
           this.miniimage=miniimage;
           this.tilemap=tilemap;
+          this.elevationmap=elevationmap;          
           this.selected=[];
           this.selectionstack=[];       // Selection flood fill stack
           this.p1=null;                 // Selection box p1
@@ -319,6 +320,21 @@ class Tilemap {
         minicanv.stroke();
         minicanv.globalAlpha=1.0;
 
+        // We draw elevation tiles at 50% brightness
+        minicanv.globalAlpha=0.5;        
+        if(this.mode==ELEV){
+            minicanv.globalAlpha=0.5;        
+            for(var xk=0;xk<this.maptilesX;xk++){
+                for(var yk=0;yk<this.maptilesY;yk++){
+                    var maptile=this.elevationmap[(yk*this.maptilesX)+xk];
+                    minicanv.fillStyle=heatMaq[maptile*2];
+                    minicanv.fillRect(xk*this.minisize,yk*this.minisize,this.minisize,this.minisize);
+                }
+            }        
+            minicanv.globalAlpha=1.0;
+
+        }
+
         // Convert scroll position to mini view pixels Draw View as Rectangle on Screen
         var scx=Math.floor((camera.scrollX/this.tileSize))*this.minisize;
         var scy=Math.floor((camera.scrollY/this.tileSize))*this.minisize;
@@ -438,6 +454,20 @@ class Tilemap {
                     }
                 }
             }
+        }
+
+        if(this.mode==ELEV){
+            // We iterate over screentiles +1 tiles
+            canv.globalAlpha=0.5;
+            for(var i=0;i<(camera.screenTiles+1);i++){
+                for(var j=0;j<(camera.screenTiles+1);j++){
+                    // We know which tile so we compare with this.hoverTile
+                    var tileno=this.elevationmap[((scy+i)*this.maptilesX)+(scx+j)];
+                    canv.fillStyle=heatMaq[tileno*2];
+                    canv.fillRect((j*this.tileSize)-offsX,(i*this.tileSize)-offsY,this.tileSize,this.tileSize);
+                }
+            }
+            canv.globalAlpha=1.0;        
         }
 
         // If mouse hover in main view
