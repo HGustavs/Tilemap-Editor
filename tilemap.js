@@ -8,6 +8,9 @@
 // Random Fill Icon tool option
 // Empty Tile Does Not Fill or Draw
 // History for flood Fill
+// Elevation drawing - box
+// Elevation toolbox 5? colors
+// Elevation 50% opacity
 
 // Current Canvas Constants
 const TOOL=1;
@@ -18,6 +21,7 @@ const HUD=4;
 // Mode Constants
 const FILL=1;
 const DRAW=2;
+const ELEV=3;
 
 // HUD Icon Spacing
 const ICONOFFS=84;
@@ -49,7 +53,7 @@ class Tilemap {
           this.toolMoving=false;          // Currently moving window
           this.toolMarked=false;          // Current selection window
           this.hoverTile=null;
-          this.mode=FILL;                 // Default drawing mode
+          this.mode=ELEV;                 // Default drawing mode
           
           // Components
           this.image=image;
@@ -339,7 +343,8 @@ class Tilemap {
         // this.mode == FILL || this.mode==DRAW
         for(var i=0;i<18;i++){
             if(i<7||i==10||i==12){
-                drawIcon(i,ICONOFFS+((i%6)*ICONSPACING),2+(Math.floor(i/6)*ICONSPACING),ICONSPACING,ICONSPACING,(i==2&&this.mode==FILL),curt,0,hudcanv);
+                var highlight=(i==2&&this.mode==FILL)||(i==1&&this.mode==DRAW)||(i==3&&this.mode==ELEV);
+                drawIcon(i,ICONOFFS+((i%6)*ICONSPACING),2+(Math.floor(i/6)*ICONSPACING),ICONSPACING,ICONSPACING,highlight,curt,0,hudcanv);
             }
         }
 
@@ -351,23 +356,34 @@ class Tilemap {
 
     drawToolView(toolcanv)
     {
-        toolcanv.drawImage(this.image,0,0,this.toolwidth,this.toolheight);
+        if(this.mode==DRAW||this.mode==FILL){
+            toolcanv.drawImage(this.image,0,0,this.toolwidth,this.toolheight);
 
-        // Grid Lines
-        this.drawGrid(this.tilecntX*this.tooltilesizeX,this.tilecntY*this.tooltilesizeY,this.tooltilesizeX,this.tooltilesizeY,"#8f8",0.4,toolcanv);
+            // Grid Lines
+            this.drawGrid(this.tilecntX*this.tooltilesizeX,this.tilecntY*this.tooltilesizeY,this.tooltilesizeX,this.tooltilesizeY,"#8f8",0.4,toolcanv);
 
-        // Thick yellow box surrounding selected tiles
-        if(this.toolMoving==TOOL||this.toolMarked==TOOL){
-            drawBox(this.p1.x*this.tileSize*this.toolZoom,this.p1.y*this.tileSize*this.toolZoom,this.p2.x*this.tileSize*this.toolZoom,this.p2.y*this.tileSize*this.toolZoom,3,"#ff8",0.4,this.tileSize*this.toolZoom,toolcanv);
-        }
+            // Thick yellow box surrounding selected tiles
+            if(this.toolMoving==TOOL||this.toolMarked==TOOL){
+                drawBox(this.p1.x*this.tileSize*this.toolZoom,this.p1.y*this.tileSize*this.toolZoom,this.p2.x*this.tileSize*this.toolZoom,this.p2.y*this.tileSize*this.toolZoom,3,"#ff8",0.4,this.tileSize*this.toolZoom,toolcanv);
+            }
 
-        // Pink box surrounding hovered tile
-        if(this.m1!=null){
-            var x1=(this.m1.tileno%this.tilecntX)*this.tileSize*this.toolZoom;
-            var y1=Math.floor(this.m1.tileno/this.tilecntX)*this.tileSize*this.toolZoom;
-            var x2=x1+(this.tileSize*this.toolZoom);
-            var y2=y1+(this.tileSize*this.toolZoom);
-            drawBox(x1,y1,x2,y2,3,"#f8f",0.4,0,toolcanv);
+            // Pink box surrounding hovered tile
+            if(this.m1!=null){
+                var x1=(this.m1.tileno%this.tilecntX)*this.tileSize*this.toolZoom;
+                var y1=Math.floor(this.m1.tileno/this.tilecntX)*this.tileSize*this.toolZoom;
+                var x2=x1+(this.tileSize*this.toolZoom);
+                var y2=y1+(this.tileSize*this.toolZoom);
+                drawBox(x1,y1,x2,y2,3,"#f8f",0.4,0,toolcanv);
+            }
+
+        }else if(this.mode==ELEV){
+            // Grid Lines
+            this.drawGrid(this.tilecntX*this.tooltilesizeX,this.tilecntY*this.tooltilesizeY,this.tooltilesizeX,this.tooltilesizeY,"#4c3",0.4,toolcanv);
+
+            for(var i=0;i<5;i++){
+                toolcanv.fillStyle=heatMaq[i*2];
+                toolcanv.fillRect(i*this.tooltilesizeX,0,this.tooltilesizeX,this.tooltilesizeY);
+            }
         }
 
     }

@@ -1,3 +1,7 @@
+// Color scheme YlGnBu from https://help.qlik.com/en-US/sense/February2024/Subsystems/Hub/Content/Sense_Hub/Visualizations/VisualizationBundle/heatmap-chart.htm
+var heatMap=["#FFD","#EFB","#CEB","#7CB","#4BC","#19C","#25A","#239","#015"];
+var heatMaq=["#35A","#38C","#6AD","#9DF","#CEF","#EDC","#FA7","#E75","#C43","#A13"];
+
 // drawBox draws a line rectangle when given two unordered points
 function drawBox(x1,y1,x2,y2,linewidth,color,opacity,offs,canv)
 {
