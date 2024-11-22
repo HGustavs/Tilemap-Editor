@@ -29,8 +29,6 @@ function drawIcon(no,xk,yk,iconwidth,iconheight,highlight,hoverno,press,canv)
     canv.save();
     canv.translate(xk,yk);
 
-    console.log(hoverno,no);
-
     if(highlight) drawBox(0,0,iconwidth,iconheight,2,"#fed",0.7,0,canv);   
 
     if(hoverno==no){

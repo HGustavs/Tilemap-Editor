@@ -50,6 +50,7 @@ class Tilemap {
           this.tooltilesizeX=this.tileSize*this.toolZoom;
           this.tooltilesizeY=this.tileSize*this.toolZoom;          
           
+          this.hoverKind=false;           // Current hover kind
           this.toolMoving=false;          // Currently moving window
           this.toolMarked=false;          // Current selection window
           this.hoverTile=null;
@@ -120,6 +121,9 @@ class Tilemap {
     // Mouse move in brush or tool view
     mapMove(mx,my,rx,ry,dx,dy,camera,kind)
     {
+        // Assign hover kind
+        this.hoverKind=kind;
+        
         // Read tile position - independent of drawing mode
         if(kind==BRUSH||kind==TOOL){
             curx=Math.floor((mx-rx)/(this.tileSize*this.toolZoom));
@@ -171,6 +175,19 @@ class Tilemap {
             }
 
             redraw=true;
+        }else if(this.mode==ELEV){
+            // if toolMoving != false
+            if(this.toolMoving==MAIN){
+                this.p2={x:curx,y:cury};
+            }
+
+            // We assign p1 if tool moving is detected
+            if((Math.abs(dx)>3||Math.abs(dy)>3)&&(this.toolMoving==-1)){
+                this.toolMoving=kind;
+                this.toolMarked=false;
+                this.p1={x:curx,y:cury};
+            }
+            redraw=true;            
         }
 
     }
@@ -289,6 +306,30 @@ class Tilemap {
 
             }
  //           alert("FILL!"+curx+" "+cury+" "+this.tilemap[(cury*this.maptilesX)+curx]);
+        }else if(this.mode==ELEV){
+            if(kind==MAIN){
+                // If mouse is making selection box
+                if(this.toolMoving>0){
+                    this.toolMarked=kind;
+                }else{
+                    this.p1={x:curx,y:cury};
+                    this.p2={x:curx,y:cury};                
+                }
+
+                this.toolMoving=false;        
+                redraw=true;            
+            }else if(kind==TOOL){
+                // We fill p1 to p2 area
+                if(cury==0){
+                    for(var xk=Math.min(this.p1.x,this.p2.x);xk<=Math.max(this.p1.x,this.p2.x);xk++){
+                        for(var yk=Math.min(this.p1.y,this.p2.y);yk<=Math.max(this.p1.y,this.p2.y);yk++){
+                            var index=(yk*this.maptilesX)+xk;
+                            this.elevationmap[index]=curx;
+                        }               
+                    }                
+                }
+                redraw=true;
+            }
         }
     }
 
@@ -321,13 +362,13 @@ class Tilemap {
         minicanv.globalAlpha=1.0;
 
         // We draw elevation tiles at 50% brightness
-        minicanv.globalAlpha=0.5;        
+        minicanv.globalAlpha=0.4;        
         if(this.mode==ELEV){
             minicanv.globalAlpha=0.5;        
             for(var xk=0;xk<this.maptilesX;xk++){
                 for(var yk=0;yk<this.maptilesY;yk++){
                     var maptile=this.elevationmap[(yk*this.maptilesX)+xk];
-                    minicanv.fillStyle=heatMaq[maptile*2];
+                    minicanv.fillStyle=heatMaq[maptile];
                     minicanv.fillRect(xk*this.minisize,yk*this.minisize,this.minisize,this.minisize);
                 }
             }        
@@ -355,7 +396,9 @@ class Tilemap {
         hudcanv.clearRect(0,0,320,128);
         hudcanv.fillText(this.hoverTile, 0, 0);
 
-        var curt=(cury*6)+curx;
+        var curt=-1;
+
+        if(this.hoverKind==HUD) curt=(cury*6)+curx;
         // this.mode == FILL || this.mode==DRAW
         for(var i=0;i<18;i++){
             if(i<7||i==10||i==12){
@@ -396,8 +439,8 @@ class Tilemap {
             // Grid Lines
             this.drawGrid(this.tilecntX*this.tooltilesizeX,this.tilecntY*this.tooltilesizeY,this.tooltilesizeX,this.tooltilesizeY,"#4c3",0.4,toolcanv);
 
-            for(var i=0;i<5;i++){
-                toolcanv.fillStyle=heatMaq[i*2];
+            for(var i=0;i<10;i++){
+                toolcanv.fillStyle=heatMaq[i];
                 toolcanv.fillRect(i*this.tooltilesizeX,0,this.tooltilesizeX,this.tooltilesizeY);
             }
         }
@@ -456,14 +499,15 @@ class Tilemap {
             }
         }
 
+        // Draw scrolling elevation map
         if(this.mode==ELEV){
             // We iterate over screentiles +1 tiles
-            canv.globalAlpha=0.5;
+            canv.globalAlpha=0.4;
             for(var i=0;i<(camera.screenTiles+1);i++){
                 for(var j=0;j<(camera.screenTiles+1);j++){
                     // We know which tile so we compare with this.hoverTile
                     var tileno=this.elevationmap[((scy+i)*this.maptilesX)+(scx+j)];
-                    canv.fillStyle=heatMaq[tileno*2];
+                    canv.fillStyle=heatMaq[tileno];
                     canv.fillRect((j*this.tileSize)-offsX,(i*this.tileSize)-offsY,this.tileSize,this.tileSize);
                 }
             }
