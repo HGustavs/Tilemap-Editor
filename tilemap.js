@@ -220,7 +220,23 @@ class Tilemap {
         }
         
         if(kind==HUD){
-                alert("HUDPRESS!");
+            var hoverText="";
+            if(cury==0){
+                if(curx==0) hoverText="Save";
+                if(curx==1) this.mode=BRUSH;
+                if(curx==2) this.mode=FILL;
+                if(curx==3) this.mode=ELEV;
+                if(curx==4) hoverText="Undo";
+                if(curx==5) hoverText="Visi";
+            }
+            if(cury==1){
+              if(curx==0) hoverText="Open";
+              if(curx==4) hoverText="Redo";
+            }
+            if(cury==2){
+              if(curx==0) hoverText="Export";
+            }
+            if(hoverText!="")alert(hoverText);
         }else if(this.mode==DRAW){
             // If we click in Main view (drawing)
             if((kind==MAIN)&&(this.toolMoving==-1)){
@@ -394,7 +410,28 @@ class Tilemap {
         hudcanv.textBaseline = "top";
         hudcanv.fillStyle="#fff";
         hudcanv.clearRect(0,0,320,128);
-        hudcanv.fillText(this.hoverTile, 0, 0);
+
+        if(this.hoverTile!=null&&this.hoverKind!=HUD){
+            hudcanv.fillText(this.hoverTile, 0, 0);        
+        }else if(this.hoverKind==HUD){
+            var hoverText="";
+            if(cury==0){
+                if(curx==0) hoverText="Save";
+                if(curx==1) hoverText="Paint";
+                if(curx==2) hoverText="Fill";
+                if(curx==3) hoverText="Elev";
+                if(curx==4) hoverText="Undo";
+                if(curx==5) hoverText="Visi";
+            }
+            if(cury==1){
+              if(curx==0) hoverText="Open";
+              if(curx==4) hoverText="Redo";
+            }
+            if(cury==2){
+              if(curx==0) hoverText="Export";
+            }
+            hudcanv.fillText(hoverText, 0, 0);
+        }
 
         var curt=-1;
 
