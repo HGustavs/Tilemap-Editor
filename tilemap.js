@@ -83,6 +83,7 @@ class Tilemap {
           this.p2={x:11,y:11};
           this.toolMarked=BRUSH;          
 
+          this.exporter=new ExporterSaver("Tilemap Editor","v0.75","2024-11-30");
           this.brushHistory=new History(this.brushData);
           this.mainHistory=new History(this.tilemap);
           this.filler=new Filler(this.maptilesX,this.maptilesY,this.tilemap);
@@ -234,7 +235,12 @@ class Tilemap {
               if(curx==4) hoverText="Redo";
             }
             if(cury==2){
-              if(curx==0) hoverText="Export";
+              if(curx==0){
+                  hoverText="Export";
+                  this.exporter.beginExport();
+                  this.exporter.endExport();
+                  this.exporter.downloadExport();
+              }
             }
             if(hoverText!="")alert(hoverText);
         }else if(this.mode==DRAW){
