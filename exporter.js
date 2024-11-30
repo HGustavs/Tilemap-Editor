@@ -11,6 +11,32 @@ class ExporterSaver {
           this.metadata = software+" "+version+" "+softwaredate;
           this.exportstr = "";
           this.exportervers="0.1";
+
+          this.itemcount=0;
+    }
+
+    exportItem(title,itemdata)
+    {
+        if(this.itemcount>0) this.exportstr+=",";
+        this.itemcount++;
+        this.exportstr+="\n";
+        this.exportstr+="  "+title+":"+itemdata;
+    }
+
+    exportArray(title,items,rowcount)
+    {
+        if(this.itemcount>0) this.exportstr+=",";
+        this.itemcount++;
+        this.exportstr+="\n";
+        this.exportstr+="  "+title+":[";
+        for(var i=0;i<items.length;i++){
+            if(i>0) this.exportstr+=",";
+            if((i%rowcount)==0) this.exportstr+="\n    ";
+            if(items[i]<100) this.exportstr+=" ";
+            if(items[i]<10) this.exportstr+=" ";
+            this.exportstr+=items[i];
+        }
+        this.exportstr+="\n  ]";
     }
 
     // Download json string using appended page element
@@ -39,7 +65,7 @@ class ExporterSaver {
         this.exportstr+="// "+this.metadata+"\n";
         this.exportstr+="// Exporter version "+this.exportervers+" (c) Hgustavs saved on "+tmpdate.toString()+"\n";
 
-        this.exportstr+="{\n";
+        this.exportstr+="{";
     }
 
     // Close exporting string

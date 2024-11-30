@@ -238,6 +238,10 @@ class Tilemap {
               if(curx==0){
                   hoverText="Export";
                   this.exporter.beginExport();
+                  this.exporter.exportItem("maptilesX",this.maptilesX);
+                  this.exporter.exportItem("maptilesY",this.maptilesY);
+                  this.exporter.exportArray("tiles",this.tilemap,this.maptilesX);
+                  this.exporter.exportArray("elevation",this.elevationmap,this.maptilesX);
                   this.exporter.endExport();
                   this.exporter.downloadExport();
               }
