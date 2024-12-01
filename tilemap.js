@@ -219,7 +219,7 @@ class Tilemap {
             this.toolMoving=false;        
             redraw=true;
         }
-        
+
         if(kind==HUD){
             var hoverText="";
             if(cury==0){
@@ -237,11 +237,15 @@ class Tilemap {
             if(cury==2){
               if(curx==0){
                   hoverText="Export";
+                  console.log(this.mainHistory.stack);
+                  console.log(this.mainHistory.current);
                   this.exporter.beginExport();
                   this.exporter.exportItem("maptilesX",this.maptilesX);
                   this.exporter.exportItem("maptilesY",this.maptilesY);
                   this.exporter.exportArray("tiles",this.tilemap,this.maptilesX);
                   this.exporter.exportArray("elevation",this.elevationmap,this.maptilesX);
+                  this.exporter.exportItem("maincurrent",this.mainHistory.current);                  
+                  this.exporter.exportArrayObjects("mainstack",this.mainHistory.stack);
                   this.exporter.endExport();
                   this.exporter.downloadExport();
               }
@@ -249,7 +253,10 @@ class Tilemap {
             if(hoverText!="")alert(hoverText);
         }else if(this.mode==DRAW){
             // If we click in Main view (drawing)
-            if((kind==MAIN)&&(this.toolMoving==-1)){
+            if((kind==MAIN)&&(this.toolMoving==false)){
+                // Save new history state then update individual items
+                this.mainHistory.saveStack();
+
                 // Iterate over source area for each square
                 var adjy=Math.min(this.p1.y,this.p2.y);
                 var adjx=Math.min(this.p1.x,this.p2.x);
@@ -273,7 +280,7 @@ class Tilemap {
             }
 
             // If we just do a click in brush view
-            if((kind==BRUSH)&&(this.toolMoving==-1)){
+            if((kind==BRUSH)&&(this.toolMoving==false)){
                 // Iterate over source area for each square
                 var adjy=Math.min(this.p1.y,this.p2.y);
                 var adjx=Math.min(this.p1.x,this.p2.x);

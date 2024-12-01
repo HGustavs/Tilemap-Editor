@@ -1,4 +1,3 @@
-
 //-----------------------------------------------------------------------------------------------
 // Exporter and Saver - Exports arrays by concatenating a number of arrays into a bigger object
 //-----------------------------------------------------------------------------------------------
@@ -20,7 +19,7 @@ class ExporterSaver {
         if(this.itemcount>0) this.exportstr+=",";
         this.itemcount++;
         this.exportstr+="\n";
-        this.exportstr+="  "+title+":"+itemdata;
+        this.exportstr+='  "'+title+'":'+itemdata;
     }
 
     exportArray(title,items,rowcount)
@@ -28,7 +27,7 @@ class ExporterSaver {
         if(this.itemcount>0) this.exportstr+=",";
         this.itemcount++;
         this.exportstr+="\n";
-        this.exportstr+="  "+title+":[";
+        this.exportstr+='  "'+title+'":[';
         for(var i=0;i<items.length;i++){
             if(i>0) this.exportstr+=",";
             if((i%rowcount)==0) this.exportstr+="\n    ";
@@ -37,6 +36,32 @@ class ExporterSaver {
             this.exportstr+=items[i];
         }
         this.exportstr+="\n  ]";
+    }
+
+    // Array export one object per row
+    exportArrayObjects(title,items)
+    {
+        if(this.itemcount>0) this.exportstr+=",";
+        this.itemcount++;
+        this.exportstr+="\n";
+        this.exportstr+='  "'+title+'":[';
+        for(var i=0;i<items.length;i++){
+            if(i>0) this.exportstr+=",";
+            this.exportstr+="\n    {";
+            var cnt=0;
+            for(let prop in items[i]){
+                if(cnt!=0) this.exportstr+=", ";
+                this.exportstr+='"'+prop+'":';
+                if(isNaN(items[i][prop])){
+                    this.exportstr+='"'+items[i][prop]+'"';
+                }else{
+                    this.exportstr+=items[i][prop];                
+                }
+                cnt++;
+            }
+            this.exportstr+="}";
+        }
+        this.exportstr+="\n  ]";    
     }
 
     // Download json string using appended page element
@@ -61,11 +86,11 @@ class ExporterSaver {
 
         var tmpdate=new Date();
 
-        // Add export date metadata and other information
-        this.exportstr+="// "+this.metadata+"\n";
-        this.exportstr+="// Exporter version "+this.exportervers+" (c) Hgustavs saved on "+tmpdate.toString()+"\n";
+        this.exportstr+="{\n";
 
-        this.exportstr+="{";
+        // Add export date metadata and other information
+        this.exportstr+='  "meta":"'+this.metadata+'",\n';
+        this.exportstr+='  "vers":"Exporter version '+this.exportervers+' (c) Hgustavs saved on '+tmpdate.toString()+'",\n';
     }
 
     // Close exporting string
