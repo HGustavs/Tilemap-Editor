@@ -55,6 +55,7 @@ class Tilemap {
           this.toolMarked=false;          // Current selection window
           this.hoverTile=null;
           this.mode=ELEV;                 // Default drawing mode
+          this.currentLevel=0;                   // Default elevation level 
           
           // Components
           this.image=image;
@@ -83,7 +84,7 @@ class Tilemap {
           this.p2={x:11,y:11};
           this.toolMarked=BRUSH;          
 
-          this.exporter=new ExporterSaver("Tilemap Editor","v0.75","2024-11-30");
+          this.exporter=new ExporterSaver("Tilemap Editor","v0.752","2024-12-03");
           this.brushHistory=new History(this.brushData);
           this.mainHistory=new History(this.tilemap);
           this.filler=new Filler(this.maptilesX,this.maptilesY,this.tilemap);
@@ -231,7 +232,10 @@ class Tilemap {
                 if(curx==5) hoverText="Visi";
             }
             if(cury==1){
-              if(curx==0) hoverText="Open";
+              if(curx==0){
+                  // We send file picker dialog element to exporter module 
+                  this.exporter.openFile("filepicker");
+              }
               if(curx==4) hoverText="Redo";
             }
             if(cury==2){
@@ -246,6 +250,8 @@ class Tilemap {
                   this.exporter.exportArray("elevation",this.elevationmap,this.maptilesX);
                   this.exporter.exportItem("maincurrent",this.mainHistory.current);                  
                   this.exporter.exportArrayObjects("mainstack",this.mainHistory.stack);
+                  this.exporter.exportItem("brushcurrent",this.brushHistory.current);                  
+                  this.exporter.exportArrayObjects("brushstack",this.brushHistory.stack);
                   this.exporter.endExport();
                   this.exporter.downloadExport();
               }
@@ -346,20 +352,26 @@ class Tilemap {
                     this.toolMarked=kind;
                 }else{
                     this.p1={x:curx,y:cury};
-                    this.p2={x:curx,y:cury};                
+                    this.p2={x:curx,y:cury};
+                    this.toolMarked=MAIN;                                    
                 }
-
                 this.toolMoving=false;        
                 redraw=true;            
             }else if(kind==TOOL){
-                // We fill p1 to p2 area
-                if(cury==0){
+                if(curx==0){
+                    // Change to y
+                    if(cury<5) this.currentLevel=cury;
+                }else if(this.currentLevel==cury&&curx<5){
+                    // We fill p1 to p2 area
+                    var level=1+((curx-1)+(cury*4));
                     for(var xk=Math.min(this.p1.x,this.p2.x);xk<=Math.max(this.p1.x,this.p2.x);xk++){
                         for(var yk=Math.min(this.p1.y,this.p2.y);yk<=Math.max(this.p1.y,this.p2.y);yk++){
                             var index=(yk*this.maptilesX)+xk;
-                            this.elevationmap[index]=curx;
+                            this.elevationmap[index]=level;
                         }               
                     }                
+                }else if(this.currentlevel!=cury){
+                    if(cury<5) this.currentLevel=cury;
                 }
                 redraw=true;
             }
@@ -490,12 +502,37 @@ class Tilemap {
             }
 
         }else if(this.mode==ELEV){
+            toolcanv.clearRect(0,0,this.tilecntX*this.tooltilesizeX,this.tilecntY*this.tooltilesizeY);
+
             // Grid Lines
             this.drawGrid(this.tilecntX*this.tooltilesizeX,this.tilecntY*this.tooltilesizeY,this.tooltilesizeX,this.tooltilesizeY,"#4c3",0.4,toolcanv);
 
-            for(var i=0;i<10;i++){
-                toolcanv.fillStyle=heatMaq[i];
-                toolcanv.fillRect(i*this.tooltilesizeX,0,this.tooltilesizeX,this.tooltilesizeY);
+            // Draw Elevation Selector Interface
+            for(var i=0;i<6;i++){
+                toolcanv.save();
+                toolcanv.translate(1,(this.tooltilesizeY*(i))+1);
+                if(this.currentLevel==i){
+                    toolcanv.fillStyle="#aa8";
+                    toolcanv.fillRect(-1,-1,this.tooltilesizeX-1,this.tooltilesizeY-1);                            
+                    toolcanv.fillStyle="#113";
+                }else{
+                    toolcanv.fillStyle="#aa8";                
+                }
+                toolcanv.scale(0.4,0.4);
+                Writeno(toolcanv,i);
+                toolcanv.restore();
+            }
+
+            // We Draw Only Relevant Elevation Step
+            for(var j=0;j<5;j++){
+                for(var i=0;i<4;i++){
+                    if(this.currentLevel==j){
+                        toolcanv.fillStyle=heatMaq[i];
+                    }else{
+                        toolcanv.fillStyle=heatMaq[4];
+                    }
+                      toolcanv.fillRect((i+1)*this.tooltilesizeX,j*this.tooltilesizeX,this.tooltilesizeX,this.tooltilesizeY);
+                }
             }
         }
 
@@ -530,9 +567,8 @@ class Tilemap {
     }
 
     //------------------------------------------------------------------------------------------
-    // drawBrishView - Redraw main tilemap into the given canvas
+    // drawTilemap - Redraw main tilemap into the given canvas
     //-------------------------------------------------------------------------------------------
-
     drawTilemap(canv,camera)
     {
         // We iterate over screentiles +1 tiles
@@ -556,13 +592,25 @@ class Tilemap {
         // Draw scrolling elevation map
         if(this.mode==ELEV){
             // We iterate over screentiles +1 tiles
-            canv.globalAlpha=0.4;
             for(var i=0;i<(camera.screenTiles+1);i++){
                 for(var j=0;j<(camera.screenTiles+1);j++){
                     // We know which tile so we compare with this.hoverTile
                     var tileno=this.elevationmap[((scy+i)*this.maptilesX)+(scx+j)];
-                    canv.fillStyle=heatMaq[tileno];
-                    canv.fillRect((j*this.tileSize)-offsX,(i*this.tileSize)-offsY,this.tileSize,this.tileSize);
+                    var level=Math.floor((tileno-1)/4);
+                    if(tileno>0){
+                        canv.fillStyle=heatMaq[(tileno-1)%4];
+                        if(level!=this.currentLevel){
+                          canv.fillStyle="#000";
+                          canv.globalAlpha=0.6;
+                        }else{
+                          canv.globalAlpha=0.3;                        
+                        }
+                        canv.fillRect((j*this.tileSize)-offsX,(i*this.tileSize)-offsY,this.tileSize,this.tileSize);
+
+                        canv.fillStyle="#000";                        
+                        canv.fillText(tileno,(j*this.tileSize)-offsX,(i*this.tileSize)-offsY+8);
+                        canv.fillText(heatMaq[(tileno-1)%4],(j*this.tileSize)-offsX,(i*this.tileSize)-offsY+20);                        
+                    }
                 }
             }
             canv.globalAlpha=1.0;        

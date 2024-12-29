@@ -1,6 +1,13 @@
 // Color scheme YlGnBu from https://help.qlik.com/en-US/sense/February2024/Subsystems/Hub/Content/Sense_Hub/Visualizations/VisualizationBundle/heatmap-chart.htm
 var heatMap=["#FFD","#EFB","#CEB","#7CB","#4BC","#19C","#25A","#239","#015"];
-var heatMaq=["#35A","#38C","#6AD","#9DF","#CEF","#EDC","#FA7","#E75","#C43","#A13"];
+var heatMaq=[
+"#6AD","#E75","#5E7","#DA6","#353",
+"#35A","#38C","#6AD","#7CE","#9DF",
+"#A13","#C43","#E75","#F86","#FA7",
+"#291","#3C4","#5E7","#6F8","#8FB",
+"#972","#B84","#DA6","#FC8","#FEA",
+"#353","#565","#787","#9A9","#BCB","#EFE"
+];
 
 // drawBox draws a line rectangle when given two unordered points
 function drawBox(x1,y1,x2,y2,linewidth,color,opacity,offs,canv)
@@ -1012,4 +1019,207 @@ function Export(ctx){
    ctx.bezierCurveTo(11.8,15.5,12.1,15.5,12.5,15.5);
    ctx.bezierCurveTo(14.4,15.5,16.5,15.7,18.7,16.9);
    ctx.bezierCurveTo(19.8,17.7,20.7,18.7,20.9,19.9);
+}
+
+// Numbers Similar To PC VGA Font 
+
+function Writeno(ctx,no){
+   ctx.beginPath();
+   if(no==0){
+       ctx.moveTo(24.3,8.5);
+       ctx.bezierCurveTo(24.3,8,24.1,4,20.3,3.9);
+       ctx.lineTo(11.8,3.9);
+       ctx.bezierCurveTo(7.9,4,7.8,8,7.8,8.5);
+       ctx.lineTo(7.8,8.5);
+       ctx.lineTo(7.8,22.6);
+       ctx.lineTo(7.8,22.6);
+       ctx.bezierCurveTo(7.8,23.1,8,27.1,11.8,27.2);
+       ctx.lineTo(20.3,27.2);
+       ctx.bezierCurveTo(24.1,27.1,24.3,23.1,24.3,22.6);
+       ctx.lineTo(24.3,22.6);
+       ctx.lineTo(24.3,22.5);
+       ctx.lineTo(24.3,8.6);
+       ctx.lineTo(24.3,8.5);
+       ctx.lineTo(24.3,8.5);
+       ctx.lineTo(24.3,8.5);
+       ctx.moveTo(20.1,22.6);
+       ctx.bezierCurveTo(20.1,24.9,18.8,24.9,18.2,24.9);
+       ctx.bezierCurveTo(18.1,24.9,13.9,24.9,13.9,24.9);
+       ctx.bezierCurveTo(13.3,24.9,12,24.9,12,22.6);
+       ctx.bezierCurveTo(12,22.6,12,8.6,12,8.6);
+       ctx.bezierCurveTo(12,6.3,13.3,6.3,13.9,6.3);
+       ctx.bezierCurveTo(14,6.3,18.2,6.3,18.2,6.3);
+       ctx.bezierCurveTo(18.8,6.3,20.1,6.3,20.1,8.6);
+       ctx.bezierCurveTo(20.1,8.5,20.1,22.6,20.1,22.6);
+       ctx.lineTo(20.1,22.6);
+
+       ctx.moveTo(13.8,13.2);
+       ctx.lineTo(18,13.2);
+       ctx.lineTo(18,17.8);
+       ctx.lineTo(13.8,17.8);
+       ctx.lineTo(13.8,13.2);
+   }else if(no==1){
+       ctx.moveTo(19.6,3.9);
+       ctx.lineTo(14.6,3.9);
+       ctx.lineTo(7.7,10.9);
+       ctx.lineTo(12.3,10.9);
+       ctx.lineTo(14.9,8.3);
+       ctx.lineTo(14.9,24.9);
+       ctx.lineTo(10.3,24.9);
+       ctx.lineTo(10.3,27.2);
+       ctx.lineTo(24.1,27.2);
+       ctx.lineTo(24.1,24.9);
+       ctx.lineTo(19.6,24.9);
+       ctx.lineTo(19.6,3.9);  
+   }else if(no==2){
+       ctx.moveTo(19.3,22.4);
+       ctx.lineTo(19.3,24.9);
+       ctx.lineTo(12.5,24.9);
+       ctx.lineTo(12.5,21.8);
+       ctx.lineTo(21.6,12.7);
+       ctx.lineTo(22,12.3);
+       ctx.lineTo(22,12.3);
+       ctx.bezierCurveTo(22.3,12,23.9,10.6,24,9);
+       ctx.lineTo(24,9);
+       ctx.lineTo(24,9);
+       ctx.bezierCurveTo(24,8.9,24,8.8,24,8.8);
+       ctx.lineTo(24,8.5);
+       ctx.lineTo(24,8.5);
+       ctx.bezierCurveTo(24,8,23.8,4,19.5,3.9);
+       ctx.lineTo(16.8,3.9);
+       ctx.lineTo(16.8,3.9);
+       ctx.lineTo(15.8,3.9);
+       ctx.lineTo(14.8,3.9);
+       ctx.lineTo(14.8,3.9);
+       ctx.lineTo(12.1,3.9);
+       ctx.bezierCurveTo(8,4,7.8,7.9,7.8,8.5);
+       ctx.lineTo(7.8,8.5);
+       ctx.lineTo(7.8,8.6);
+       ctx.lineTo(12.5,8.6);
+       ctx.bezierCurveTo(12.5,8.5,12.5,8.5,12.5,8.5);
+       ctx.bezierCurveTo(12.5,6.2,13.9,6.2,14.7,6.2);
+       ctx.bezierCurveTo(14.8,6.2,14.9,6.2,15,6.2);
+       ctx.bezierCurveTo(15.8,6.2,16.9,6.2,16.9,6.2);
+       ctx.bezierCurveTo(17,6.2,17.1,6.2,17.2,6.2);
+       ctx.bezierCurveTo(17.8,6.2,19,6.2,19.3,7.7);
+       ctx.lineTo(19.3,8.4);
+       ctx.bezierCurveTo(19.3,8.4,19.3,8.4,19.3,8.5);
+       ctx.lineTo(19.3,8.5);
+       ctx.lineTo(19.3,8.5);
+       ctx.bezierCurveTo(19.3,8.9,19,9.4,18.3,10.2);
+       ctx.bezierCurveTo(18.3,10.2,18.1,10.3,17.9,10.5);
+       ctx.lineTo(17.9,10.5);
+       ctx.lineTo(17.8,10.6);
+       ctx.bezierCurveTo(17.8,10.6,17.8,10.6,17.8,10.6);
+       ctx.lineTo(7.8,20.7);
+       ctx.lineTo(7.9,20.7);
+       ctx.lineTo(7.8,20.7);
+       ctx.lineTo(7.8,27.2);
+       ctx.lineTo(10.7,27.2);
+       ctx.lineTo(12.5,27.2);
+       ctx.lineTo(19.3,27.2);
+       ctx.lineTo(24,27.2);
+       ctx.lineTo(24,27.2);
+       ctx.lineTo(24,22.4);
+       ctx.lineTo(19.3,22.4);
+   }else if(no==3){
+       ctx.moveTo(24,8);
+       ctx.bezierCurveTo(23.9,6.8,23.2,3.9,19.5,3.8);
+       ctx.lineTo(12.3,3.8);
+       ctx.bezierCurveTo(8,4,7.8,7.9,7.8,8.5);
+       ctx.lineTo(7.8,8.5);
+       ctx.lineTo(7.8,8.6);
+       ctx.lineTo(12.5,8.6);
+       ctx.bezierCurveTo(12.5,8.5,12.5,8.5,12.5,8.5);
+       ctx.bezierCurveTo(12.5,6.2,13.9,6.2,14.7,6.2);
+       ctx.bezierCurveTo(14.8,6.2,17.1,6.2,17.2,6.2);
+       ctx.bezierCurveTo(17.8,6.2,19.1,6.2,19.4,7.7);
+       ctx.lineTo(19.4,7.7);
+       ctx.bezierCurveTo(19.4,7.7,19.4,10.9,19.4,10.9);
+       ctx.bezierCurveTo(19.4,13.2,18,13.2,17.2,13.2);
+       ctx.bezierCurveTo(17.2,13.2,13.7,13.2,12.7,13.2);
+       ctx.lineTo(12.7,15.5);
+       ctx.bezierCurveTo(12.7,15.5,17.2,15.5,17.2,15.5);
+       ctx.bezierCurveTo(17.9,15.5,19.4,15.5,19.4,17.8);
+       ctx.bezierCurveTo(19.4,17.8,19.4,23.3,19.4,23.3);
+       ctx.lineTo(19.4,23.3);
+       ctx.bezierCurveTo(19.1,24.8,17.9,24.8,17.2,24.8);
+       ctx.bezierCurveTo(17.1,24.8,14.8,24.8,14.7,24.8);
+       ctx.bezierCurveTo(14,24.8,12.5,24.8,12.5,22.5);
+       ctx.bezierCurveTo(12.5,22.5,12.5,22.5,12.5,22.4);
+       ctx.lineTo(7.8,22.4);
+       ctx.lineTo(7.8,22.5);
+       ctx.lineTo(7.8,22.5);
+       ctx.bezierCurveTo(7.8,23,8,27,12.3,27.1);
+       ctx.lineTo(19.5,27.1);
+       ctx.bezierCurveTo(23.8,27,24,23,24,22.5);
+       ctx.lineTo(24,22.5);
+       ctx.lineTo(24,22.5);
+       ctx.lineTo(24,17.8);
+       ctx.bezierCurveTo(24,17.4,23.9,15.6,22.6,14.3);
+       ctx.bezierCurveTo(23.9,13.1,24,11.2,24,10.8);
+       ctx.lineTo(24,10.8);
+       ctx.lineTo(24,8);
+   }else if(no==4){
+       ctx.moveTo(24.1,17.9);
+       ctx.lineTo(24.1,15.5);
+       ctx.lineTo(21.7,15.5);
+       ctx.lineTo(21.7,3.9);
+       ctx.lineTo(17,3.9);
+       ctx.lineTo(16.7,3.9);
+       ctx.lineTo(7.7,13);
+       ctx.lineTo(7.7,15.5);
+       ctx.lineTo(7.7,17.9);
+       ctx.lineTo(12.4,17.9);
+       ctx.lineTo(17,17.9);
+       ctx.lineTo(17,24.9);
+       ctx.lineTo(14.5,24.9);
+       ctx.lineTo(14.5,27.2);
+       ctx.lineTo(24.1,27.2);
+       ctx.lineTo(24.1,24.9);
+       ctx.lineTo(21.7,24.9);
+       ctx.lineTo(21.7,17.9);
+       ctx.lineTo(24.1,17.9);
+       ctx.lineTo(24.1,17.9);
+       ctx.moveTo(12.4,15.5);
+       ctx.lineTo(12.4,12.9);
+       ctx.lineTo(17,8.3);
+       ctx.lineTo(17,15.5);
+       ctx.lineTo(12.4,15.5);
+   }else if(no==5){
+       ctx.moveTo(24,6.2);
+       ctx.lineTo(24,3.9);
+       ctx.lineTo(24,3.9);
+       ctx.lineTo(7.8,3.9);
+       ctx.lineTo(7.8,13.9);
+       ctx.lineTo(7.8,13.9);
+       ctx.lineTo(7.8,15.6);
+       ctx.bezierCurveTo(8.4,15.6,17.1,15.6,17.2,15.6);
+       ctx.bezierCurveTo(17.8,15.6,18.9,15.6,19.3,16.8);
+       ctx.bezierCurveTo(19.3,17,19.4,20.4,19.4,20.4);
+       ctx.lineTo(19.4,20.4);
+       ctx.bezierCurveTo(19.4,21.9,19.4,23.5,19.4,23.5);
+       ctx.lineTo(19.4,23.5);
+       ctx.bezierCurveTo(19.1,25,17.9,25,17.2,25);
+       ctx.bezierCurveTo(17.1,25,14.8,25,14.7,25);
+       ctx.bezierCurveTo(14,25,12.5,25,12.5,22.7);
+       ctx.bezierCurveTo(12.5,22.7,12.5,22.7,12.5,22.6);
+       ctx.lineTo(7.8,22.6);
+       ctx.lineTo(7.8,22.7);
+       ctx.lineTo(7.8,22.7);
+       ctx.bezierCurveTo(7.8,23.2,8,27.2,12.3,27.3);
+       ctx.lineTo(19.5,27.3);
+       ctx.bezierCurveTo(23.8,27.2,24,23.2,24,22.7);
+       ctx.lineTo(24,22.7);
+       ctx.lineTo(24,22.7);
+       ctx.lineTo(24,20.4);
+       ctx.lineTo(24,20.4);
+       ctx.bezierCurveTo(24,20.4,24,17.8,24,17.6);
+       ctx.lineTo(24,17.6);
+       ctx.bezierCurveTo(23.9,16.4,23.2,13.5,19.5,13.4);
+       ctx.lineTo(12.5,13.4);
+       ctx.lineTo(12.5,6.4);
+       ctx.lineTo(24,6.2);
+   }
+   ctx.fill();
 }

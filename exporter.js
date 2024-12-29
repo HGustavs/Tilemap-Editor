@@ -99,5 +99,27 @@ class ExporterSaver {
         // Close string
         this.exportstr+="\n}";
     }
+    
+    openFile(itemid)
+    {
+        // Show file picker dialog
+        document.getElementById('filepicker').click();
 
+        // Create form data element
+        const formData = new FormData();
+        const fileField = document.getElementById('filepicker');
+        formData.append('filename', fileField.files[0]);
+
+        // Upload file and await response containing file contents
+        fetch('openFile.php', {
+        method: 'PUT',
+        body: formData
+        })
+        .then(response => response.json() )
+        .then(result=>{ console.log(result) })
+        .catch((error) => {
+        console.error('Error:', error);
+        });
+
+    }
 }

@@ -17,7 +17,7 @@ class Camera2D {
         this.scrollY+=offsY;
         if(this.scrollX<0) this.scrollX=0;
         if(this.scrollY<0) this.scrollY=0;
-        if(this.scrollX>((tilemap.maptilesX-this.screenTiles-3)*tilemap.tileSize)) this.scrollX=(tilemap.maptilesX-this.screenTiles-3)*tilemap.tileSize;
-        if(this.scrollY>((tilemap.maptilesY-this.screenTiles-3)*tilemap.tileSize)) this.scrollY=(tilemap.maptilesY-this.screenTiles-3)*tilemap.tileSize;
+        if(this.scrollX>((tilemap.maptilesX-this.screenTiles)*tilemap.tileSize)) this.scrollX=(tilemap.maptilesX-this.screenTiles)*tilemap.tileSize;
+        if(this.scrollY>((tilemap.maptilesY-this.screenTiles)*tilemap.tileSize)) this.scrollY=(tilemap.maptilesY-this.screenTiles)*tilemap.tileSize;
     }  
 }

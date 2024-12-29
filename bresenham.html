@@ -88,6 +88,10 @@
       return (y2-y1)+(x2-x1);
   }
   
+  //------------------------------------------------------------------------------------------
+  // TraceLine - Visibility line tracing including n step penetration
+  //-------------------------------------------------------------------------------------------
+
   function TraceLine(ox,oy,x2,y2,rangeLimit)
   {
     var xDiff = x2 - ox;
@@ -120,23 +124,18 @@
       }
       var x = index & 0xFFFF;
       var y = index >> 16;
-      //if(rangeLimit >= 0 && GetDistance(ox,oy, x, y) > rangeLimit) break;
-      //visibility[(y*30)+x]++;
+
       visibility[(y*30)+x]=0;
       if(tileMap[(y*30)+x]==1) cnt++;
       if(cnt>0) break;
     }
   }
 
-  //alert(cnt);
+  //------------------------------------------------------------------------------------------
+  // tileVisibility - Interprets Line tracing
+  //-------------------------------------------------------------------------------------------
 
-/*
-  cnt=0;
-  for(var i=0;i<(Math.PI*2);i+=(Math.PI/50)){
-      TraceLine(pox,poy,pox+(Math.cos(i)*15),poy+(Math.sin(i)*15),200); 
-  }
-  alert(cnt);
-*/
+  // Tile visibility
 
   // We add tiles together using the following pattern
   //    01     |     pos-cnt     | 16 |   |  32 |     
